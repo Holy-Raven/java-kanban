@@ -2,16 +2,17 @@ package tracker.model;
 
 import tracker.util.Status;
 
-public class SubTask extends Task implements HasId {
-    private Epic epic;
+public class SubTask extends Task {
 
-    public SubTask(String name, String description, int id, Status status, Epic epic) {
+    private final int epicId;
+
+    public SubTask(String name, String description, int id, Status status, int epicId) {
         super(name, description, id, status);
-        this.epic = epic;
+        this.epicId = epicId;
     }
 
-    public Epic getEpic() {
-        return epic;
+    public int getEpic() {
+        return epicId;
     }
 
 }

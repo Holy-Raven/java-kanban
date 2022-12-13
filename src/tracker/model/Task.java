@@ -1,9 +1,8 @@
 package tracker.model;
 
 import tracker.util.Status;
-import java.util.Objects;
 
-public class Task implements HasId {
+public class Task {
 
     private String name;                                        // Название - суть задачи.
     private String description;                                 // Описание раскрывающее детали задачи.
@@ -31,7 +30,6 @@ public class Task implements HasId {
 
     public void setDescription(String description) { this.description = description; }
 
-    @Override
     public int getId() { return id; }
 
     public void setId(int id) { this.id = id; }
