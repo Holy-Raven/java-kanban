@@ -1,5 +1,6 @@
 package tracker.model;
 
+import tracker.service.InMemoryTaskManager;
 import tracker.util.Status;
 
 public class Task {
@@ -9,17 +10,17 @@ public class Task {
     private int id;                                             // Код - номер задачи.
     private Status status;                                      // Статус выполнения задачи:
 
-    public Task(String name, String description, int id, Status status) {
+    public Task(String name, String description, Status status) {
         this.name = name;
         this.description = description;
-        this.id = id;
+        this.id = InMemoryTaskManager.getId();
         this.status = status;
     }
 
-    public Task(String name, String description, int id) {
+    public Task(String name, String description) {
         this.name = name;
         this.description = description;
-        this.id = id;
+        this.id = InMemoryTaskManager.getId();
     }
 
     public String getName() { return name; }

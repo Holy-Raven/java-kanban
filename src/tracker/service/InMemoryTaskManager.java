@@ -3,18 +3,24 @@ package tracker.service;
 import tracker.model.Epic;
 import tracker.model.SubTask;
 import tracker.model.Task;
+import tracker.util.Managers;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import static tracker.util.Status.*;
 
-public class Manager {
-    private int id;
+public class InMemoryTaskManager implements TaskManager{
 
-    public Manager(int id) {
-        this.id = id;
+    private static int id = 1;
+
+    private static final InMemoryHistoryManager inMemoryHistoryManager = (InMemoryHistoryManager) Managers.getDefaultHistory();
+
+    public static InMemoryHistoryManager getInMemoryHistoryManager() {
+        return inMemoryHistoryManager;
     }
+
     // Cписок всех задач.
     private final HashMap <Integer, Task> taskMap = new HashMap<>();
     // Список всех эпик задач.
@@ -24,7 +30,7 @@ public class Manager {
 
     // На вход метода подается задача, если там не null, то загружаем ее в общий список задач. Если на вход пришел
     // null, то выводим пользователю, что задача не найдена.
-
+    @Override
     public void loadTask(Task task) {
 
         if (task != null) {
@@ -36,7 +42,7 @@ public class Manager {
 
     // На вход метода подается Эпик задача, если там не null, то загружаем ее в общий список задач и список эпиков.
     // обновляем ее статус. Если на вход пришел null, о выводим пользователю, что задача не найдена.
-
+    @Override
     public void loadEpicTask(Epic epic) {
 
         if (epic != null) {
@@ -51,7 +57,7 @@ public class Manager {
     // На вход метода подается СубТаск, если там не null, вносим айди задачи в список родительского эпика после
     // этого загружаем ее в общий список задач и список подзадач. Обновляем статус родителя. Если на вход пришел
     // null, о выводим пользователю, что задача не найдена.
-
+    @Override
     public void loadSubTask(SubTask subTask) {
 
         if (subTask != null) {
@@ -66,15 +72,19 @@ public class Manager {
     }
 
     // Получение списка всех задач.
+    @Override
     public HashMap<Integer, Task> getTaskMap() { return taskMap; }
 
     // Получение списка всех эпик задач.
+    @Override
     public HashMap<Integer, Epic> getEpicMap() { return epicMap; }
 
     // Получение списка всех подзадач.
+    @Override
     public HashMap<Integer, SubTask> getSubTaskMap() { return subTaskMap; }
 
     // Удаление всех задач.
+    @Override
     public void deleteAllTask() {
         taskMap.clear();
         epicMap.clear();
@@ -82,12 +92,14 @@ public class Manager {
     }
 
     // Удаление всех эпик задач.
+    @Override
     public void deleteAllEpic() {
         epicMap.clear();
         subTaskMap.clear();
     }
 
     // Удаление всех подзадач.
+    @Override
     public void deleteAllSubTask() {
         subTaskMap.clear();
     }
@@ -99,7 +111,7 @@ public class Manager {
     // то мы сохраняем значение флага, если же одно из этих условий не верно, то мы меняем flagNew - false, тогда значит
     // статус подзадачи уже не может быть NEW, такую же проверку мы делаем для DONE, по итогу если оба наши флага по
     // завершению метода стали false, то значит статус нашей задачи IN_PROGRESS.
-
+    @Override
     public void instalStatusEpic(Epic epic) {
         boolean flagNew = true;
         boolean flagDone = true;
@@ -134,14 +146,10 @@ public class Manager {
         }
     }
 
-    // подзадачу в списке подзадач, после этого обновляем статус Эпика-родителя. Если в общем списке нет указанной
-    // задачи то, говорим пользователю, что такой задачи нет, заменить не выйдет.
-
-
     // Сперва по ключу входящей задачи мы проверяем есть ли в общем списке задач такая задача, и есть ли она вообще -
     // не пришел ли на вход метода null, если находим ее там, то обновляем в общем списке. Если на вход пришел null,
     // то выводим пользователю, что задача не найдена.
-
+    @Override
     public void updateTask (Task task) {
 
         if (task != null && taskMap.containsKey(task.getId())) {
@@ -154,8 +162,7 @@ public class Manager {
     // Сперва по ключу входящей задачи мы проверяем есть ли в общем списке задач такая задача, и есть ли она вообще -
     // не пришел ли на вход метода null, если находим ее там то обновляем в общем списке и списке эпиков. После этого
     // обновляем и статус задачи. Если на вход пришел null, то выводим пользователю, что задача не найдена.
-
-
+    @Override
     public void updateTask (Epic epic) {
 
         if (epic != null && taskMap.containsKey(epic.getId())) {
@@ -171,7 +178,7 @@ public class Manager {
     // не пришел ли на вход метода null, если находим ее там то обновляем подзадачу в общем списке и списке подзадач,
     // после этого обновляем статус Эпика-родителя. Если на вход пришел null, то выводим пользователю, что задача
     // не найдена.
-
+    @Override
     public void updateSubTask (SubTask subTask) {
 
         if (subTask != null && taskMap.containsKey(subTask.getId())) {
@@ -183,11 +190,10 @@ public class Manager {
         }
     }
 
-
     // Удаление задачи по ID
     // Проверяем, есть ли задача с таким ID в общем списке задач если находим, то удаляем. Если в списке нет задачи с
     // таким ID то, говорим пользователю, что такой задачи нет, удалить ничего не выйдет.
-
+    @Override
     public void removeTask(int id) {
         if (taskMap.containsKey(id)) {
             taskMap.remove(id);
@@ -199,7 +205,7 @@ public class Manager {
     // Проверяем есть ли задача в списке эпиков, если находим, то мы должны удалить все ее подзадачи в общем списке и
     // списке подзадач, после этого удаляем и сам эпик из списка эпиков и списке задач. Если в списке нет задачи с таким
     // ID то, говорим пользователю, что такой задачи нет, удалить ничего не выйдет.
-
+    @Override
     public void removeEpicTask(int id) {
 
         if (epicMap.containsKey(id)) {
@@ -219,7 +225,7 @@ public class Manager {
     // после этого удаляем id подзадачи из внутреннего списка id подзадач в эпике родителе. Удаляем подзадачу их общего
     // списка и списка подзадач. Обновляем статус эпика родителя. Если в списке нет задачи с таким ID то, говорим
     // пользователю, что такой задачи нет, удалить ничего не выйдет.
-
+    @Override
     public void removeSubTask(Integer id) {
 
         if (subTaskMap.containsKey(id)) {
@@ -236,10 +242,68 @@ public class Manager {
         }
     }
 
+    // Выдать Task по его id
+    // создаем объект Task. Обращаемся в полный список задач, если задача с указанным айди не null и не является ни Epic
+    // ни subTask то записываем значение ячейки в returnTask. Обновляем список истории запросов и выводим запрос на экран.
+    // Если какое-то условие не выполнено, выводим на экран, что такой Task задачи не найдено.
+    @Override
+    public Task getTask(int id) {
+        Task returnTask = null;
+
+        if ((taskMap.get(id) != null) && !(taskMap.get(id) instanceof SubTask) && !(taskMap.get(id) instanceof Epic)) {
+            returnTask =  taskMap.get(id);
+            inMemoryHistoryManager.add(taskMap.get(id));
+            System.out.println(returnTask);
+        } else {
+            System.out.println("Такой Task задачи не найдено");
+        }
+        return returnTask;
+    }
+
+    // Выдать subTask по его id
+    // создаем объект subTask. Обращаемся в полный список задач, если задача с указанным айди не null и является
+    // subTask то записываем значение ячейки в returnSubTask. Обновляем список истории запросов и выводим запрос на экран.
+    // Если какое-то условие не выполнено, выводим на экран, что такой subTask задачи не найдено.
+    @Override
+    public SubTask getSubTask(int id) {
+        SubTask returnSubTask = null;
+
+        if (taskMap.get(id) != null && taskMap.get(id) instanceof SubTask subTask) {
+            returnSubTask =  subTask;
+            inMemoryHistoryManager.add(taskMap.get(id));
+            System.out.println(returnSubTask);
+        } else {
+            System.out.println("Такой subTask задачи не найдено");
+        }
+        return returnSubTask;
+
+    }
+
+    // Выдать subTask по его id
+    // создаем объект Epic. Обращаемся в полный список задач, если задача с указанным айди не null и является Epic
+    // то записываем значение ячейки в returnSubTask. Обновляем список истории запросов и выводим запрос на экран.
+    // Если какое-то условие не выполнено, выводим на экран, что такой Epic задачи не найдено.
+    @Override
+    public Epic getEpic(int id) {
+        Epic returnEpic = null;
+
+        if (taskMap.get(id) != null && taskMap.get(id) instanceof Epic epic){
+            returnEpic = epic;
+            inMemoryHistoryManager.add(taskMap.get(id));
+            System.out.println(returnEpic);
+        } else {
+            System.out.println("Такой Epic задачи не найдено");
+        }
+        return returnEpic;
+    }
+
+    public static int getId() {
+        return id++;
+    }
+
     // Получение списка подзадач определенного эпика
     // Обращаемся к списку задач указанного эпика и если он не пустой, выдаем все подзадачи с айди из этого списка,
     // иначе говорим что у данного эпика нет подзадач.
-
     public List<SubTask> getListSubTaSkForEpic(Epic epic) {
         List<SubTask> listSubTaSkForEpic = new ArrayList<>();
 
@@ -253,9 +317,7 @@ public class Manager {
         return null;
     }
 
-    // Такого метода не было в задании, но мне кажется он еще пригодиться в будущем.
-    // true - задача завершена
-
+    // Метод проверки завершения задачи (true - задача завершена)
     public boolean isEndedTask(Task task) {
 
         boolean flag = false;
@@ -274,7 +336,4 @@ public class Manager {
         return flag;
     }
 
-    public int getId() {
-        return id++;
-    }
 }
