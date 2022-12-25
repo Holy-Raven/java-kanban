@@ -11,15 +11,21 @@ import java.util.List;
 
 import static tracker.util.Status.*;
 
-public class InMemoryTaskManager implements TaskManager{
+public class InMemoryTaskManager implements TaskManager {
 
     private static int id = 1;
 
-    private static final InMemoryHistoryManager inMemoryHistoryManager = (InMemoryHistoryManager) Managers.getDefaultHistory();
+    private final HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
 
-    public static InMemoryHistoryManager getInMemoryHistoryManager() {
-        return inMemoryHistoryManager;
+
+    // так как мы не можем из main обратиться к полю inMemoryHistoryManager, не создав публичного метода
+    // getInMemoryHistoryManager, а список запросов напечатать нам все же нужно, то мы создаем отдельный метод для
+    // вывода в консоль нашего списка.
+
+    public void printHistoryList() {
+        inMemoryHistoryManager.getHistory();
     }
+
 
     // Cписок всех задач.
     private final HashMap <Integer, Task> taskMap = new HashMap<>();
@@ -253,6 +259,7 @@ public class InMemoryTaskManager implements TaskManager{
         if ((taskMap.get(id) != null) && !(taskMap.get(id) instanceof SubTask) && !(taskMap.get(id) instanceof Epic)) {
             returnTask =  taskMap.get(id);
             inMemoryHistoryManager.add(taskMap.get(id));
+            inMemoryHistoryManager.updateListHistory();
             System.out.println(returnTask);
         } else {
             System.out.println("Такой Task задачи не найдено");
@@ -271,6 +278,7 @@ public class InMemoryTaskManager implements TaskManager{
         if (taskMap.get(id) != null && taskMap.get(id) instanceof SubTask subTask) {
             returnSubTask =  subTask;
             inMemoryHistoryManager.add(taskMap.get(id));
+            inMemoryHistoryManager.updateListHistory();
             System.out.println(returnSubTask);
         } else {
             System.out.println("Такой subTask задачи не найдено");
@@ -290,6 +298,7 @@ public class InMemoryTaskManager implements TaskManager{
         if (taskMap.get(id) != null && taskMap.get(id) instanceof Epic epic){
             returnEpic = epic;
             inMemoryHistoryManager.add(taskMap.get(id));
+            inMemoryHistoryManager.updateListHistory();
             System.out.println(returnEpic);
         } else {
             System.out.println("Такой Epic задачи не найдено");

@@ -89,7 +89,10 @@ public class Main {
         inMemoryTaskManager.getTask(2);
         System.out.println();
 
-        InMemoryTaskManager.getInMemoryHistoryManager().getHistory();
+        System.out.println();
+
+        inMemoryTaskManager.printHistoryList();
+
 
         //===================================================================
 //        System.out.println("Выводим полный список задач");
