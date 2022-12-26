@@ -18,12 +18,19 @@ public class InMemoryTaskManager implements TaskManager {
     private final HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
 
 
-    // так как мы не можем из main обратиться к полю inMemoryHistoryManager, не создав публичного метода
-    // getInMemoryHistoryManager, а список запросов напечатать нам все же нужно, то мы создаем отдельный метод для
-    // вывода в консоль нашего списка.
+    // Принимаем список из поля inMemoryHistoryManager, проверяем не пустой ли он, и если он не пустой то выводим в
+    // консоль все его содержимое. Если список пустой, то говорим что список истории задач пуст.
 
     public void printHistoryList() {
-        inMemoryHistoryManager.getHistory();
+
+        if (!inMemoryHistoryManager.getHistory().isEmpty()) {
+
+            for (Task task : inMemoryHistoryManager.getHistory()) {
+                System.out.println(task);
+            }
+        } else {
+            System.out.println("Cписок истории задач пуст");
+        }
     }
 
 

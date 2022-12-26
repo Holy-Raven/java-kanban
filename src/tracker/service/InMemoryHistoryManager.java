@@ -12,19 +12,8 @@ public class InMemoryHistoryManager implements HistoryManager {
         taskListHistory.add(task);
     }
 
-    // Проверяем не пуст ли наш список запросов. Если размер списка больше 10, то удаляем первый элемент
-    // печатаем список в консоль. Если список пуст - выводим надпись, что список пуст.
     @Override
     public ArrayList<Task> getHistory() {
-
-        if (!taskListHistory.isEmpty()) {
-
-            for (Task task : taskListHistory) {
-                System.out.println(task);
-            }
-        } else {
-            System.out.println("Cписок истории задач пуст");
-        }
         return taskListHistory;
     }
 
