@@ -8,7 +8,10 @@ public class InMemoryHistoryManager implements HistoryManager {
     private Node head;
     private Node tail;
 
+    private int size = 0;
     HashMap<Integer, Node> mapHistory = new HashMap<>();
+
+    private static final int LIST_HISTORY_SIZE = 4;
 
     // Проверяем по ключу есть ли такая нода в мапе истории запросов, если есть то удаляем ее, после этого добавляем ее
     // в конец списка, если же найти ноду не удалось в мапе, то просто добавляем ее в конец списка
@@ -45,6 +48,10 @@ public class InMemoryHistoryManager implements HistoryManager {
     //Добавить вконец списка
     public void linkLast(Task element) {
 
+        if (size == LIST_HISTORY_SIZE) {
+            removeNode(head);
+        }
+
         Node oldTail = tail;
         Node newNode = new Node<>(element, oldTail, null);
 
@@ -54,6 +61,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         this.tail = newNode;
         mapHistory.put(element.getId(), newNode);
 
+        size++;
     }
 
     // Создаем список, если голова списка не равна нулу, создаем новую ноду равную голове списка, пока нода не равна нулу
@@ -82,21 +90,28 @@ public class InMemoryHistoryManager implements HistoryManager {
     // середине списка, и тогда меняем ссылки.
     public void removeNode (Node node) {
 
-        Node prevNode = node.prev;
-        Node nextNode = node.next;
+        if (mapHistory.containsValue(node)) {
 
-        if (prevNode == null) {
-            nextNode.prev = null;
-            this.head = nextNode;
+            Node removeNode = node;
+            Node prevNode = node.prev;
+            Node nextNode = node.next;
 
-        } else if (nextNode == null) {
-            prevNode.next = null;
-            this.tail = prevNode;
-        } else {
-            prevNode.next = nextNode;
-            nextNode.prev = prevNode;
+            if (prevNode == null) {
+                nextNode.prev = null;
+                this.head = nextNode;
+
+            } else if (nextNode == null) {
+                prevNode.next = null;
+                this.tail = prevNode;
+            } else {
+                prevNode.next = nextNode;
+                nextNode.prev = prevNode;
+            }
+
+            mapHistory.remove(removeNode.data.getId());
+
+            size--;
         }
-
     }
 
     private static class Node<E> {
