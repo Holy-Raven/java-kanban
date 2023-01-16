@@ -1,36 +1,113 @@
 package tracker.service;
 import tracker.model.Task;
-import java.util.ArrayList;
+import java.util.*;
+
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    // Cписок истории запросов пользователя.
-    private final ArrayList<Task> taskListHistory = new ArrayList<>();
+    private Node head;
+    private Node tail;
 
+    HashMap<Integer, Node> mapHistory = new HashMap<>();
+
+    // Проверяем по ключу есть ли такая нода в мапе истории запросов, если есть то удаляем ее, после этого добавляем ее
+    // в конец списка, если же найти ноду не удалось в мапе, то просто добавляем ее в конец списка
     @Override
     public void add(Task task) {
-        taskListHistory.add(task);
+
+        if (mapHistory.containsKey(task.getId())){
+            remove(task.getId());
+            linkLast(task);
+        } else {
+            linkLast(task);
+        }
     }
 
     @Override
-    public ArrayList<Task> getHistory() {
-        return taskListHistory;
+    public void remove(int id) {
+
+        removeNode(mapHistory.get(id));
+        mapHistory.remove(id);
+
     }
 
-    // Немного не поняла замечание, в плане, что мой метод getHistory() и так отдельный метод для вывода списка в консоль,
-    // но я реализовала метод обновления списка, чтобы удалять лишние значения в нем не в момент его вывода в консоль,
-    // а сразу при его пополнении смотреть.
+    //возвращаем результат метод getTask()
+    @Override
+    public List<Task> getHistory() {
+        return getTask();
+    }
 
-    public void updateListHistory (){
 
-        if (!taskListHistory.isEmpty()) {
+    // Создаем новую ноду и помещаем в нее хвост списка. Создаем новую ноду, где на месте предыдущего элемента будет
+    // Хвост нашего списка, а в теле Ноды наша Таск из аргумента, Делаем проверки. Присваиваем хвосту нашего списка
+    // значение новой ноды. Заполняем мапу новым значением.
 
-            while (taskListHistory.size() > 10) {
-                taskListHistory.remove(0);
+    //Добавить вконец списка
+    public void linkLast(Task element) {
+
+        Node oldTail = tail;
+        Node newNode = new Node<>(element, oldTail, null);
+
+        if (oldTail == null) head = newNode;
+        else oldTail.next = newNode;
+
+        this.tail = newNode;
+        mapHistory.put(element.getId(), newNode);
+
+    }
+
+    // Создаем список, если голова списка не равна нулу, создаем новую ноду равную голове списка, пока нода не равна нулу
+    // добавляем елемент(дату) этой ноды в список задач, и загружаем в ноду следующую.
+    public List<Task> getTask() {
+
+        List<Task> list = new ArrayList<>();
+
+        if (this.head != null) {
+
+            Node node = this.head;
+
+            while (node != null) {
+                list.add(node.data);
+                node = node.next;
             }
-
         } else {
-            System.out.println("Cписок истории задач пуст");
+            System.out.println("Такой задачи не стоит");;
+        }
+        return list;
+    }
+
+    // В аргумент метода подаем ноду. Создаем два поля предыдущая нода и следующая. Если предыдущая нода = нулу, значит
+    // мы в голове, тогда предыдущая ссылка некст ноды = нулу, а голова равна нект ноде. Аналогично на счет конца списка.
+    // Если следующая ссылка некстноды = нулу, то хвост равен предыдущей ноды. Иначе же наша исходная нода находится в
+    // середине списка, и тогда меняем ссылки.
+    public void removeNode (Node node) {
+
+        Node prevNode = node.prev;
+        Node nextNode = node.next;
+
+        if (prevNode == null) {
+            nextNode.prev = null;
+            this.head = nextNode;
+
+        } else if (nextNode == null) {
+            prevNode.next = null;
+            this.tail = prevNode;
+        } else {
+            prevNode.next = nextNode;
+            nextNode.prev = prevNode;
+        }
+
+    }
+
+    private static class Node<E> {
+        Task data;
+        Node<E> prev;
+        Node<E> next;
+
+        public Node(Task data, Node<E> prev, Node<E> next) {
+            this.data = data;
+            this.prev = prev;
+            this.next = next;
         }
     }
 

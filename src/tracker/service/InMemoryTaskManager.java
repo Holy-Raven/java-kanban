@@ -1,10 +1,8 @@
 package tracker.service;
-
 import tracker.model.Epic;
 import tracker.model.SubTask;
 import tracker.model.Task;
 import tracker.util.Managers;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,14 +15,13 @@ public class InMemoryTaskManager implements TaskManager {
 
     private final HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
 
-
     // Принимаем список из поля inMemoryHistoryManager, проверяем не пустой ли он, и если он не пустой то выводим в
     // консоль все его содержимое. Если список пустой, то говорим что список истории задач пуст.
-
     public void printHistoryList() {
 
         if (!inMemoryHistoryManager.getHistory().isEmpty()) {
 
+            System.out.println("История запросов:");
             for (Task task : inMemoryHistoryManager.getHistory()) {
                 System.out.println(task);
             }
@@ -32,7 +29,6 @@ public class InMemoryTaskManager implements TaskManager {
             System.out.println("Cписок истории задач пуст");
         }
     }
-
 
     // Cписок всех задач.
     private final HashMap <Integer, Task> taskMap = new HashMap<>();
@@ -54,7 +50,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     // На вход метода подается Эпик задача, если там не null, то загружаем ее в общий список задач и список эпиков.
-    // обновляем ее статус. Если на вход пришел null, о выводим пользователю, что задача не найдена.
+    // Обновляем ее статус. Если на вход пришел null, о выводим пользователю, что задача не найдена.
     @Override
     public void loadEpicTask(Epic epic) {
 
@@ -204,20 +200,23 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     // Удаление задачи по ID
-    // Проверяем, есть ли задача с таким ID в общем списке задач если находим, то удаляем. Если в списке нет задачи с
-    // таким ID то, говорим пользователю, что такой задачи нет, удалить ничего не выйдет.
+    // Проверяем, есть ли задача с таким ID в общем списке задач если находим, то удаляем. И удаляем из списка просмотров.
+    // Если в списке нет задачи с таким ID то, говорим пользователю, что такой задачи нет, удалить ничего не выйдет.
     @Override
     public void removeTask(int id) {
         if (taskMap.containsKey(id)) {
             taskMap.remove(id);
+
+            inMemoryHistoryManager.remove(id);
+
         } else {
             System.out.println("Сбой, задача не найдена.");
         }
     }
 
-    // Проверяем есть ли задача в списке эпиков, если находим, то мы должны удалить все ее подзадачи в общем списке и
-    // списке подзадач, после этого удаляем и сам эпик из списка эпиков и списке задач. Если в списке нет задачи с таким
-    // ID то, говорим пользователю, что такой задачи нет, удалить ничего не выйдет.
+    // Проверяем есть ли задача в списке эпиков, если находим, то мы должны удалить все ее подзадачи в общем списке,
+    // списке подзадач и истории просмотров, после этого удаляем и сам эпик из списка эпиков, списка задач и истории
+    // просмотров.  Если в списке нет задачи с таким ID то, говорим пользователю, что такой задачи нет, удалить ничего не выйдет.
     @Override
     public void removeEpicTask(int id) {
 
@@ -225,9 +224,12 @@ public class InMemoryTaskManager implements TaskManager {
             for (Integer idSubTask : epicMap.get(id).getSubTaskList()) {
                 subTaskMap.remove(idSubTask);
                 taskMap.remove(idSubTask);
+                inMemoryHistoryManager.remove(idSubTask);
             }
             taskMap.remove(id);
             epicMap.remove(id);
+
+            inMemoryHistoryManager.remove(id);
 
         } else {
             System.out.println("Сбой, задача не найдена.");
@@ -235,9 +237,9 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     // Проверяем есть ли задача в списке подзадач, если находим, то записываем id эпика родителя в отдельную переменную,
-    // после этого удаляем id подзадачи из внутреннего списка id подзадач в эпике родителе. Удаляем подзадачу их общего
-    // списка и списка подзадач. Обновляем статус эпика родителя. Если в списке нет задачи с таким ID то, говорим
-    // пользователю, что такой задачи нет, удалить ничего не выйдет.
+    // после этого удаляем id подзадачи из внутреннего списка id подзадач в эпике родителе. Удаляем подзадачу из общего
+    // списка, списка подзадач и истории просмотров. Обновляем статус эпика родителя. Если в списке нет задачи с таким ID
+    // то, говорим пользователю, что такой задачи нет, удалить ничего не выйдет.
     @Override
     public void removeSubTask(Integer id) {
 
@@ -249,7 +251,11 @@ public class InMemoryTaskManager implements TaskManager {
             taskMap.remove(id);
             subTaskMap.remove(id);
 
+            inMemoryHistoryManager.remove(id);            //удаляем подзадачу из списка просмотров
+
             instalStatusEpic(epicMap.get(idEpicParent));
+
+
         } else {
             System.out.println("Сбой, задача не найдена.");
         }
@@ -266,8 +272,6 @@ public class InMemoryTaskManager implements TaskManager {
         if ((taskMap.get(id) != null) && !(taskMap.get(id) instanceof SubTask) && !(taskMap.get(id) instanceof Epic)) {
             returnTask =  taskMap.get(id);
             inMemoryHistoryManager.add(taskMap.get(id));
-            inMemoryHistoryManager.updateListHistory();
-            System.out.println(returnTask);
         } else {
             System.out.println("Такой Task задачи не найдено");
         }
@@ -285,8 +289,6 @@ public class InMemoryTaskManager implements TaskManager {
         if (taskMap.get(id) != null && taskMap.get(id) instanceof SubTask subTask) {
             returnSubTask =  subTask;
             inMemoryHistoryManager.add(taskMap.get(id));
-            inMemoryHistoryManager.updateListHistory();
-            System.out.println(returnSubTask);
         } else {
             System.out.println("Такой subTask задачи не найдено");
         }
@@ -305,8 +307,6 @@ public class InMemoryTaskManager implements TaskManager {
         if (taskMap.get(id) != null && taskMap.get(id) instanceof Epic epic){
             returnEpic = epic;
             inMemoryHistoryManager.add(taskMap.get(id));
-            inMemoryHistoryManager.updateListHistory();
-            System.out.println(returnEpic);
         } else {
             System.out.println("Такой Epic задачи не найдено");
         }

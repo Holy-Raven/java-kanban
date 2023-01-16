@@ -12,106 +12,109 @@ public class Main {
         Managers manager = new Managers();
         InMemoryTaskManager inMemoryTaskManager = (InMemoryTaskManager) manager.getDefault();
 
-        System.out.println("Cоздание отдельных задач");
+        //System.out.println("Cоздание отдельных задач");
 
-        Task firstTask = new Task("Закрыть ипотеку",
-                "Выплатить всю сумму задолженности",
+        Task firstTask = new Task("Task 1",
+                "Первая задача",
                 Status.NEW);
         inMemoryTaskManager.loadTask(firstTask);
 
-        Task secondTask = new Task("Купить кошку",
-                "Подобрать подходящий экземпляр и приобрести",
+        Task secondTask = new Task("Task 2",
+                "Вторая задача",
                 Status.NEW);
         inMemoryTaskManager.loadTask(secondTask);
         //===================================================================
-        System.out.println("Создание эпика и две подзадачи в нем");
+        //System.out.println("Создание эпика и три подзадачи в нем");
 
-        Epic firstEpicTask = new Epic("Купить Mustang",
-                "Shelby GT 500 black edition");
+        Epic firstEpicTask = new Epic("Epic 1",
+                "Первый Эпик");
         inMemoryTaskManager.loadEpicTask(firstEpicTask);
 
-        SubTask firstStep = new SubTask("Стать IT специалистом",
-                "Закончить курс Яндекс практикума, познать тайны JAVA",
-                Status.DONE,
+        SubTask firstStep = new SubTask("SubTask 1 Epic 1",
+                "Первая подзадача Эпика 1",
+                Status.IN_PROGRESS,
                 firstEpicTask.getId());
         inMemoryTaskManager.loadSubTask(firstStep);
 
-        SubTask secondStep = new SubTask("Устроиться на работу",
-                "Получать заработную плату от 150 000 руб.",
+        SubTask secondStep = new SubTask("SubTask 2 Epic 1",
+                "Вторая подзадача Эпика 1",
                 Status.DONE,
                 firstEpicTask.getId());
         inMemoryTaskManager.loadSubTask(secondStep);
-        //===================================================================
-        System.out.println("Создание эпика и одной подзадачи в нем");
 
-        Epic secondEpicTask = new Epic("Отдых за границей",
-                "Посетить остров мечты - Бали");
+        SubTask thirdStep = new SubTask("SubTask 3 Epic 1",
+                "Третья подзадача Эпика 1",
+                Status.DONE,
+                firstEpicTask.getId());
+        inMemoryTaskManager.loadSubTask(thirdStep);
+
+        //===================================================================
+        //System.out.println("Создание эпика без подзадач в нем");
+
+        Epic secondEpicTask = new Epic("Epic 2",
+                "Второй Эпик");
         inMemoryTaskManager.loadEpicTask(secondEpicTask);
 
-        SubTask thirdStep = new SubTask("Оформить документы",
-                "Необходимо получить загранпаспорт",
-                Status.NEW,
-                secondEpicTask.getId());
-        inMemoryTaskManager.loadSubTask(thirdStep);
         //===================================================================
-//        System.out.println("Удаление задач с 1 по 3");
-//        manager.removeTask(1);
-//        manager.removeTask(2);
-//        manager.removeEpicTask(3);
-//        manager.removeSubTask(7);
 
 
         //===================================================================
-//      проверяем работу списка просмотров задач
-
-        System.out.println();
-        System.out.println("Такие задачи не найдет");
-        inMemoryTaskManager.getSubTask(10);
-        inMemoryTaskManager.getSubTask(6);
-        inMemoryTaskManager.getTask(3);
-        inMemoryTaskManager.getEpic(4);
-        System.out.println();
+        //проверяем работу списка просмотров задач
+//        System.out.println();
+//        System.out.println("Такие задачи не найдет");
+//
+//        inMemoryTaskManager.getSubTask(10);
+//        inMemoryTaskManager.getSubTask(6);
+//        inMemoryTaskManager.getTask(3);
+//        inMemoryTaskManager.getEpic(4);
+//        System.out.println();
 
         System.out.println("Такие задачи сможем просмотреть");
         inMemoryTaskManager.getTask(1);
-        inMemoryTaskManager.getEpic(3);     // такая эпик задача есть, но в списке просмотров она уже затёрлась.
-        inMemoryTaskManager.getTask(1);
+        inMemoryTaskManager.getEpic(3);
         inMemoryTaskManager.getTask(1);
         inMemoryTaskManager.getSubTask(4);  // 10-ая c конца это тут
         inMemoryTaskManager.getTask(1);
         inMemoryTaskManager.getTask(2);
-        inMemoryTaskManager.getTask(2);
-        inMemoryTaskManager.getTask(2);
-        inMemoryTaskManager.getTask(2);
+        inMemoryTaskManager.getSubTask(5);
+        inMemoryTaskManager.getEpic(3);
+        inMemoryTaskManager.getEpic(7);
         inMemoryTaskManager.getTask(1);
-        inMemoryTaskManager.getTask(1);
         inMemoryTaskManager.getTask(2);
         inMemoryTaskManager.getTask(2);
+        inMemoryTaskManager.getSubTask(6);
+
+        inMemoryTaskManager.printHistoryList();
         System.out.println();
 
+        System.out.println("Удаление задач");
+        //inMemoryTaskManager.removeTask(1);
+        inMemoryTaskManager.removeTask(2);
+        inMemoryTaskManager.removeEpicTask(7);
+        inMemoryTaskManager.removeSubTask(4);
         System.out.println();
 
         inMemoryTaskManager.printHistoryList();
 
-
         //===================================================================
 //        System.out.println("Выводим полный список задач");
-//        for (Task task: manager.getTaskMap().values()) {
+//        for (Task task: inMemoryTaskManager.getTaskMap().values()) {
 //            System.out.println(task);
 //        }
 //        System.out.println();
 //
 //        System.out.println("Выводим список эпик задач");
-//        for (Epic epic : manager.getEpicMap().values()) {
+//        for (Epic epic : inMemoryTaskManager.getEpicMap().values()) {
 //            System.out.println(epic);
 //        }
 //        System.out.println();
 //
 //        System.out.println("Выводим список подзадач");
-//        for (SubTask subTask : manager.getSubTaskMap().values()) {
+//        for (SubTask subTask : inMemoryTaskManager.getSubTaskMap().values()) {
 //            System.out.println(subTask);
 //        }
+//
+//        System.out.println();
 
-        System.out.println();
     }
 }
