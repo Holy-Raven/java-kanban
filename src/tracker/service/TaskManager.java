@@ -26,7 +26,7 @@ public interface TaskManager {
     void updateTask (Task task);
     void updateTask (Epic epic);
     void updateSubTask (SubTask subTask);
-
+    public void printHistoryList();
     void removeTask(int id);
     void removeEpicTask(int id);
     void removeSubTask(Integer id);

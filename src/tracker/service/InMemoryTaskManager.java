@@ -15,6 +15,13 @@ public class InMemoryTaskManager implements TaskManager {
 
     private final HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
 
+    // Cписок всех задач.
+    private final HashMap <Integer, Task> taskMap = new HashMap<>();
+    // Список всех эпик задач.
+    private final HashMap <Integer, Epic> epicMap = new HashMap<>();
+    // Список всех подзадач.
+    private final HashMap <Integer, SubTask> subTaskMap = new HashMap<>();
+
     // Принимаем список из поля inMemoryHistoryManager, проверяем не пустой ли он, и если он не пустой то выводим в
     // консоль все его содержимое. Если список пустой, то говорим что список истории задач пуст.
     public void printHistoryList() {
@@ -29,13 +36,6 @@ public class InMemoryTaskManager implements TaskManager {
             System.out.println("Cписок истории задач пуст");
         }
     }
-
-    // Cписок всех задач.
-    private final HashMap <Integer, Task> taskMap = new HashMap<>();
-    // Список всех эпик задач.
-    private final HashMap <Integer, Epic> epicMap = new HashMap<>();
-    // Список всех подзадач.
-    private final HashMap <Integer, SubTask> subTaskMap = new HashMap<>();
 
     // На вход метода подается задача, если там не null, то загружаем ее в общий список задач. Если на вход пришел
     // null, то выводим пользователю, что задача не найдена.

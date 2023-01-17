@@ -7,11 +7,9 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     private Node head;
     private Node tail;
-
     private int size = 0;
-    HashMap<Integer, Node> mapHistory = new HashMap<>();
-
-    private static final int LIST_HISTORY_SIZE = 4;
+    private final HashMap<Integer, Node> mapHistory = new HashMap<>();
+    private static final int LIST_HISTORY_SIZE = 5;
 
     // Проверяем по ключу есть ли такая нода в мапе истории запросов, если есть то удаляем ее, после этого добавляем ее
     // в конец списка, если же найти ноду не удалось в мапе, то просто добавляем ее в конец списка
