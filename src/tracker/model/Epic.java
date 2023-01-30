@@ -1,5 +1,7 @@
 package tracker.model;
 
+import tracker.util.Status;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +11,10 @@ public class Epic extends Task {
 
     public Epic(String name, String description) {
         super(name, description);
+    }
+
+    public Epic(String name, String description, int id, Status status) {
+        super(name, description, id, status);
     }
 
     public List<Integer> getSubTaskList() {
@@ -22,6 +28,7 @@ public class Epic extends Task {
                 ", description='" + getDescription() + '\'' +
                 ", id=" + getId() +
                 ", status=" + getStatus() +
+                ", taskType=" + getTaskType() +
                 '}';
     }
 }

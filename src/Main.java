@@ -1,7 +1,6 @@
 import tracker.model.Epic;
 import tracker.model.SubTask;
 import tracker.model.Task;
-import tracker.service.InMemoryTaskManager;
 import tracker.service.TaskManager;
 import tracker.util.Managers;
 import tracker.util.Status;
@@ -11,6 +10,7 @@ public class Main {
     public static void main(String[] args) {
 
         Managers manager = new Managers();
+
         TaskManager taskManager = manager.getDefault();
 
         //System.out.println("Cоздание отдельных задач");
@@ -70,7 +70,7 @@ public class Main {
 //        taskManager.getEpic(4);
 //        System.out.println();
 
-        System.out.println("Такие задачи сможем просмотреть");
+        //System.out.println("Такие задачи сможем просмотреть");
         taskManager.getTask(1);
         taskManager.getEpic(3);
         taskManager.getTask(1);
@@ -81,21 +81,20 @@ public class Main {
         taskManager.getEpic(3);
         taskManager.getEpic(7);
         taskManager.getTask(1);
-        taskManager.getTask(2);
+        taskManager.getSubTask(4);
         taskManager.getTask(2);
         taskManager.getSubTask(6);
 
         taskManager.printHistoryList();
         System.out.println();
 
-        System.out.println("Удаление задач");
-        //inMemoryTaskManager.removeTask(1);
-        taskManager.removeTask(2);
-        taskManager.removeEpicTask(7);
-        taskManager.removeSubTask(4);
-        System.out.println();
-
-        taskManager.printHistoryList();
+//        System.out.println("Удаление задач");
+//        //taskManager.removeTask(2);
+//        taskManager.removeEpicTask(7);
+//        taskManager.removeSubTask(4);
+//        System.out.println();
+//
+//        taskManager.printHistoryList();
 
         //===================================================================
 //        System.out.println("Выводим полный список задач");
@@ -105,13 +104,13 @@ public class Main {
 //        System.out.println();
 //
 //        System.out.println("Выводим список эпик задач");
-//        for (Epic epic : taskManager.getEpicMap().values()) {
+//        for (Epic epic : inMemoryTaskManager.getEpicMap().values()) {
 //            System.out.println(epic);
 //        }
 //        System.out.println();
 //
 //        System.out.println("Выводим список подзадач");
-//        for (SubTask subTask : taskManager.getSubTaskMap().values()) {
+//        for (SubTask subTask : inMemoryTaskManager.getSubTaskMap().values()) {
 //            System.out.println(subTask);
 //        }
 //

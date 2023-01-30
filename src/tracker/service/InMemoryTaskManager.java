@@ -1,26 +1,30 @@
+
 package tracker.service;
+
 import tracker.model.Epic;
 import tracker.model.SubTask;
 import tracker.model.Task;
 import tracker.util.Managers;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import static tracker.util.Status.*;
+import static tracker.util.TaskType.*;
 
 public class InMemoryTaskManager implements TaskManager {
 
+    // Cписок всех задач.
+    protected final HashMap <Integer, Task> taskMap = new HashMap<>();
+    // Список всех эпик задач.
+    protected final HashMap <Integer, Epic> epicMap = new HashMap<>();
+    // Список всех подзадач.
+    protected final HashMap <Integer, SubTask> subTaskMap = new HashMap<>();
+
     private static int id = 1;
 
-    private final HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
-
-    // Cписок всех задач.
-    private final HashMap <Integer, Task> taskMap = new HashMap<>();
-    // Список всех эпик задач.
-    private final HashMap <Integer, Epic> epicMap = new HashMap<>();
-    // Список всех подзадач.
-    private final HashMap <Integer, SubTask> subTaskMap = new HashMap<>();
+    protected static final HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
 
     // Принимаем список из поля inMemoryHistoryManager, проверяем не пустой ли он, и если он не пустой то выводим в
     // консоль все его содержимое. Если список пустой, то говорим что список истории задач пуст.
@@ -44,9 +48,13 @@ public class InMemoryTaskManager implements TaskManager {
 
         if (task != null) {
             taskMap.put(task.getId(), task);
+            instalTaskType(task);
+            // inMemoryHistoryManager.add(task);
         } else {
             System.out.println("Сбой, задача не найдена.");
         }
+
+
     }
 
     // На вход метода подается Эпик задача, если там не null, то загружаем ее в общий список задач и список эпиков.
@@ -58,6 +66,8 @@ public class InMemoryTaskManager implements TaskManager {
             taskMap.put(epic.getId(), epic);
             epicMap.put(epic.getId(), epic);
             instalStatusEpic(epic);
+            instalTaskType(epic);
+            //inMemoryHistoryManager.add(epic);
         } else {
             System.out.println("Сбой, задача не найдена.");
         }
@@ -69,15 +79,18 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void loadSubTask(SubTask subTask) {
 
+        Task task = subTask;
+
         if (subTask != null) {
             epicMap.get(subTask.getEpic()).getSubTaskList().add(subTask.getId());
             taskMap.put(subTask.getId(), subTask);
             subTaskMap.put(subTask.getId(), subTask);
             instalStatusEpic(epicMap.get(subTask.getEpic()));
+            instalTaskType(subTask);
+            //inMemoryHistoryManager.add(subTask);
         } else {
             System.out.println("Сбой, задача не найдена.");
         }
-
     }
 
     // Получение списка всех задач.
@@ -153,6 +166,18 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             epic.setStatus(IN_PROGRESS);
         }
+    }
+
+    public static void instalTaskType(Task task){
+
+        if (task instanceof Epic){
+            task.setTaskType(EPIC);
+        } else if (task instanceof SubTask){
+            task.setTaskType(SUBTASK);
+        } else {
+            task.setTaskType(TASK);
+        }
+
     }
 
     // Сперва по ключу входящей задачи мы проверяем есть ли в общем списке задач такая задача, и есть ли она вообще -

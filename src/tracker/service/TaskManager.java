@@ -3,8 +3,6 @@ package tracker.service;
 import tracker.model.Epic;
 import tracker.model.SubTask;
 import tracker.model.Task;
-
-
 import java.util.HashMap;
 
 public interface TaskManager {
@@ -26,7 +24,7 @@ public interface TaskManager {
     void updateTask (Task task);
     void updateTask (Epic epic);
     void updateSubTask (SubTask subTask);
-    public void printHistoryList();
+
     void removeTask(int id);
     void removeEpicTask(int id);
     void removeSubTask(Integer id);
@@ -34,5 +32,7 @@ public interface TaskManager {
     Task getTask(int id);
     SubTask getSubTask(int id);
     Epic getEpic(int id);
+
+    void printHistoryList();
 
 }

@@ -1,3 +1,4 @@
+
 package tracker.service;
 import tracker.model.Task;
 import java.util.*;
@@ -7,9 +8,12 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     private Node head;
     private Node tail;
+
     private int size = 0;
+
     private final HashMap<Integer, Node> mapHistory = new HashMap<>();
-    private static final int LIST_HISTORY_SIZE = 5;
+
+    private static final int LIST_HISTORY_SIZE = 8;
 
     // Проверяем по ключу есть ли такая нода в мапе истории запросов, если есть то удаляем ее, после этого добавляем ее
     // в конец списка, если же найти ноду не удалось в мапе, то просто добавляем ее в конец списка
@@ -28,7 +32,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     public void remove(int id) {
 
         removeNode(mapHistory.get(id));
-        mapHistory.remove(id);
+        //mapHistory.remove(id);
 
     }
 
@@ -37,7 +41,6 @@ public class InMemoryHistoryManager implements HistoryManager {
     public List<Task> getHistory() {
         return getTask();
     }
-
 
     // Создаем новую ноду и помещаем в нее хвост списка. Создаем новую ноду, где на месте предыдущего элемента будет
     // Хвост нашего списка, а в теле Ноды наша Таск из аргумента, Делаем проверки. Присваиваем хвосту нашего списка
@@ -77,7 +80,8 @@ public class InMemoryHistoryManager implements HistoryManager {
                 node = node.next;
             }
         } else {
-            System.out.println("Такой задачи не стоит");;
+            //Список истории запросов пуст;
+            return null;
         }
         return list;
     }
@@ -123,5 +127,6 @@ public class InMemoryHistoryManager implements HistoryManager {
             this.next = next;
         }
     }
+
 
 }
