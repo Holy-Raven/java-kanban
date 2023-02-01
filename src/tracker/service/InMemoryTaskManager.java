@@ -49,7 +49,6 @@ public class InMemoryTaskManager implements TaskManager {
         if (task != null) {
             taskMap.put(task.getId(), task);
             instalTaskType(task);
-            // inMemoryHistoryManager.add(task);
         } else {
             System.out.println("Сбой, задача не найдена.");
         }
@@ -67,7 +66,6 @@ public class InMemoryTaskManager implements TaskManager {
             epicMap.put(epic.getId(), epic);
             instalStatusEpic(epic);
             instalTaskType(epic);
-            //inMemoryHistoryManager.add(epic);
         } else {
             System.out.println("Сбой, задача не найдена.");
         }
@@ -87,7 +85,6 @@ public class InMemoryTaskManager implements TaskManager {
             subTaskMap.put(subTask.getId(), subTask);
             instalStatusEpic(epicMap.get(subTask.getEpic()));
             instalTaskType(subTask);
-            //inMemoryHistoryManager.add(subTask);
         } else {
             System.out.println("Сбой, задача не найдена.");
         }

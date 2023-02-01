@@ -1,9 +1,10 @@
-
 package tracker.service;
 
 import tracker.model.Epic;
 import tracker.model.SubTask;
 import tracker.model.Task;
+import tracker.util.ManagerSaveException;
+import tracker.util.Managers;
 import tracker.util.Status;
 import tracker.util.TaskType;
 
@@ -18,13 +19,9 @@ import static tracker.util.Status.*;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
-    File file;
-
+    private File file;
     public FileBackedTasksManager(File file) {
         this.file = file;
-    }
-
-    public FileBackedTasksManager() {
     }
 
     @Override
@@ -32,7 +29,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         super.loadTask(task);
         save();
     }
-
     @Override
     public void loadEpicTask(Epic epic) {
         super.loadEpicTask(epic);
@@ -127,8 +123,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
         String title = "id,type,name,status,description,epic\n";
 
-        try (BufferedWriter writter = new BufferedWriter(new FileWriter("resources/taskTracker.txt",
-                StandardCharsets.UTF_8, false))) {
+        try (BufferedWriter writter = new BufferedWriter(new FileWriter(file, StandardCharsets.UTF_8, false))) {
 
             writter.write(title,0,title.length());
 
@@ -144,9 +139,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
         catch (IOException e) {
             System.out.println("Произошла ошибка во время записи файла.");
-            throw new RuntimeException(e);
-        }
+            throw new ManagerSaveException(e);
 
+        }
     }
 
     // Создаем изменяемую строку, и поочередно добавляем в нее поля нашего таска через запятую
@@ -276,7 +271,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     private static FileBackedTasksManager loadFromFile(File file) {
 
-        FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager();
+        FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(file);
 
         //берем ссылку на файл в формате стринг
         String path = file.getAbsolutePath();
@@ -289,7 +284,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         try {
             str = Files.readString(Path.of(path));
         } catch (IOException e){
-            System.out.println("Невозможно прочитать файл. Возможно файл не находиться в указанной директории");
+            System.out.println("Неизвестная ошибка работы с файлами" + e.getMessage());
             return null;
         }
 
@@ -324,7 +319,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             }
         }
 
-
         for (Integer taskID : taskHistoryCopy) {
             inMemoryHistoryManager.add(fileBackedTasksManager.taskMap.get(taskID));
         }
@@ -334,10 +328,10 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     public static void main(String[] args) {
 
-        String path = "resources/taskTracker.txt";
-        File file = new File(path);
+        File file = new File("resources/taskTracker.txt");
 
-        TaskManager taskManager = new FileBackedTasksManager(file);
+        Managers manager = new Managers();
+        TaskManager taskManager = manager.getFileBackedTasksManager(file);
 
         Task firstTask = new Task("Task 1",
                 "Первая задача",
@@ -387,22 +381,19 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         taskManager.getTask(2);
         taskManager.getSubTask(6);
 
-        System.out.println("Удаление задач");
-        taskManager.removeEpicTask(7);
-        System.out.println();
-
+        System.out.println("Создали второй менеджер и загрузили задачи из файла: " + file.getAbsolutePath());
         TaskManager loadFromFile = loadFromFile(file);
+
+        System.out.println();
 
         assert loadFromFile != null;
         loadFromFile.printHistoryList();
 
         System.out.println();
-        System.out.println("Выводим полный список задач");
+        System.out.println("Полный список задач");
 
         for (Task task: loadFromFile.getTaskMap().values()) {
             System.out.println(task);
         }
-
     }
-
 }

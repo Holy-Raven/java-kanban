@@ -5,5 +5,6 @@ id,type,name,status,description,epic
 4,SUBTASK,SubTask 1 Epic 1,IN_PROGRESS,Первая подзадача Эпика 1,SUBTASK,3
 5,SUBTASK,SubTask 2 Epic 1,DONE,Вторая подзадача Эпика 1,SUBTASK,3
 6,SUBTASK,SubTask 3 Epic 1,DONE,Третья подзадача Эпика 1,SUBTASK,3
+7,EPIC,Epic 2,NEW,Второй Эпик,EPIC,
 
 5,3,1,4,2,6,
