@@ -1,3 +1,4 @@
+
 package tracker.service;
 
 import tracker.model.Epic;
@@ -17,9 +18,10 @@ import java.util.List;
 
 import static tracker.util.Status.*;
 
-public class FileBackedTasksManager extends InMemoryTaskManager {
+public class FileBackedTasksManager extends InMemoryTaskManager implements TaskManager {
 
-    private File file;
+    private final File file;
+
     public FileBackedTasksManager(File file) {
         this.file = file;
     }
@@ -29,6 +31,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         super.loadTask(task);
         save();
     }
+
     @Override
     public void loadEpicTask(Epic epic) {
         super.loadEpicTask(epic);
@@ -66,8 +69,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void updateTask(Epic epic) {
-        super.updateTask(epic);
+    public void updateEpic(Epic epic) {
+        super.updateEpic(epic);
         save();
     }
 
@@ -117,11 +120,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return epic;
     }
 
-///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private void save() {
 
-        String title = "id,type,name,status,description,epic\n";
+        String title = "id, type, name, status, description, startTime, duration, endTime, taskType, epic\n";
 
         try (BufferedWriter writter = new BufferedWriter(new FileWriter(file, StandardCharsets.UTF_8, false))) {
 
@@ -135,7 +138,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 writter.write("\n");
                 writter.write(historyToString(inMemoryHistoryManager));
             }
-
         }
         catch (IOException e) {
             System.out.println("Произошла ошибка во время записи файла.");
@@ -150,9 +152,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
         StringBuilder builder = new StringBuilder();
 
+        //поле 0
         // добавляем в строку id задачи
         builder.append(task.getId()).append(",");
 
+        //поле 1
         // добавляем в строку тип задачи
         switch (task.getTaskType()) {
             case TASK:
@@ -164,10 +168,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             case SUBTASK:
                 builder.append("SUBTASK,");
         }
-
+        // поле 2
         // добавляем имя задачи
         builder.append(task.getName()).append(",");
 
+        // поле 3
         // добавляем в строку статус задачи
         switch (task.getStatus()) {
             case NEW:
@@ -180,8 +185,23 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 builder.append("IN_PROGRESS,");
         }
 
+        // поле 4
+        // добавляем описание задачи
         builder.append(task.getDescription()).append(",");
 
+        // поле 5
+        // добавляем время начала задачи
+        builder.append(task.getStartTimeString()).append(",");
+
+        //поле 6
+        // добавляем продолжительность задачи
+        builder.append(task.getDuration()).append(",");
+
+        //поле 7
+        // ожидаемое время завершения задачи
+        builder.append(task.getEndTimeString()).append(",");
+
+        //поле 8 + 9 (если subTask)
         // добавляем в строку тип задачи
         switch (task.getTaskType()) {
             case TASK:
@@ -207,16 +227,27 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
         String[] arrayField = value.split(",");
 
-        if (arrayField[5].equals("TASK")) {
-            if (arrayField[3].equals("NEW"))
-                task = new Task(arrayField[2], arrayField[4], NEW);
-            if (arrayField[3].equals("DONE"))
-                task = new Task(arrayField[2], arrayField[4], DONE);
-            if (arrayField[3].equals("IN_PROGRESS"))
-                task = new Task(arrayField[2], arrayField[4], IN_PROGRESS);
+        if (arrayField[8].equals("TASK")) {
+
+            if (arrayField[5].equals("время начала не указано")) {
+                if (arrayField[3].equals("NEW"))
+                    task = new Task(arrayField[2], arrayField[4], NEW);
+                if (arrayField[3].equals("DONE"))
+                    task = new Task(arrayField[2], arrayField[4], DONE);
+                if (arrayField[3].equals("IN_PROGRESS"))
+                    task = new Task(arrayField[2], arrayField[4], IN_PROGRESS);
+            } else {
+                if (arrayField[3].equals("NEW"))
+                    task = new Task(arrayField[2], arrayField[4], NEW, arrayField[5], Integer.parseInt(arrayField[6]));
+                if (arrayField[3].equals("DONE"))
+                    task = new Task(arrayField[2], arrayField[4], DONE, arrayField[5], Integer.parseInt(arrayField[6]));
+                if (arrayField[3].equals("IN_PROGRESS"))
+                    task = new Task(arrayField[2], arrayField[4], IN_PROGRESS, arrayField[5], Integer.parseInt(arrayField[6]));
+            }
         }
 
-        if (arrayField[5].equals("EPIC")) {
+        if (arrayField[8].equals("EPIC")) {
+
             if (arrayField[3].equals("NEW"))
                 task = new Epic(arrayField[2], arrayField[4]);
             if (arrayField[3].equals("DONE"))
@@ -225,16 +256,26 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 task = new Epic(arrayField[2], arrayField[4]);
         }
 
-        if (arrayField[5].equals("SUBTASK")) {
-            if (arrayField[3].equals("NEW"))
-                task = new SubTask(arrayField[2], arrayField[4], NEW, Integer.parseInt(arrayField[6]));
-            if (arrayField[3].equals("DONE"))
-                task = new SubTask(arrayField[2], arrayField[4], DONE, Integer.parseInt(arrayField[6]));
-            if (arrayField[3].equals("IN_PROGRESS"))
-                task = new SubTask(arrayField[2], arrayField[4], IN_PROGRESS, Integer.parseInt(arrayField[6]));
+        if (arrayField[8].equals("SUBTASK")) {
+            if (arrayField[5].equals("время начала не указано")) {
+                if (arrayField[3].equals("NEW"))
+                    task = new SubTask(arrayField[2], arrayField[4], NEW, Integer.parseInt(arrayField[9]));
+                if (arrayField[3].equals("DONE"))
+                    task = new SubTask(arrayField[2], arrayField[4], DONE, Integer.parseInt(arrayField[9]));
+                if (arrayField[3].equals("IN_PROGRESS"))
+                    task = new SubTask(arrayField[2], arrayField[4], IN_PROGRESS, Integer.parseInt(arrayField[9]));
+            } else {
 
+                if (arrayField[3].equals("NEW"))
+                    task = new SubTask(arrayField[2], arrayField[4], NEW, arrayField[5], Integer.parseInt(arrayField[6]), Integer.parseInt(arrayField[9]));
+                if (arrayField[3].equals("DONE"))
+                    task = new SubTask(arrayField[2], arrayField[4], DONE, arrayField[5], Integer.parseInt(arrayField[6]), Integer.parseInt(arrayField[9]));
+                if (arrayField[3].equals("IN_PROGRESS"))
+                    task = new SubTask(arrayField[2], arrayField[4], IN_PROGRESS, arrayField[5], Integer.parseInt(arrayField[6]), Integer.parseInt(arrayField[9]));
+            }
         }
 
+        assert task != null;
         task.setId(Integer.parseInt(arrayField[0]));
         instalTaskType(task);
 
@@ -269,14 +310,18 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return arrayId;
     }
 
-    private static FileBackedTasksManager loadFromFile(File file) {
+    public static FileBackedTasksManager loadFromFile(File file) {
 
         FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(file);
+        HistoryManager inMemoryHistoryManager = new InMemoryHistoryManager();
 
         //берем ссылку на файл в формате стринг
         String path = file.getAbsolutePath();
         //список копия таскмапа содержащий строки
         List <String> taskMapCopy = new ArrayList<>();
+        //список копия истории запросов
+        List<Integer> taskHistoryCopy = null;
+
 
         //строка с данными из файла
         String str;
@@ -292,11 +337,31 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         String[] allString = str.split("\n");
 
         //заполняем массив данный списка таскмапы строками, первая строка нам не нужна, как и две последние тоже.
-        for (int i=1; i<allString.length - 2; i++){
-            taskMapCopy.add(allString[i]);
+
+        if (allString.length <= 2) {
+
+            for (int i=1; i<allString.length ; i++){
+                taskMapCopy.add(allString[i]);
+            }
+        } else if (!allString[allString.length - 2].equals("")) {
+
+            for (int i=1; i<allString.length; i++){
+                taskMapCopy.add(allString[i]);
+            }
         }
+
+        if ((allString.length > 2) && (allString[allString.length - 2].equals(""))) {
+
+            for (int i = 1; i < allString.length - 2; i++) {
+                taskMapCopy.add(allString[i]);
+            }
+        }
+
+
         //берем последнюю строку файла и заполняем из нее список содержащий id задач из списка истории
-        List<Integer> taskHistoryCopy = historyFromString(allString[allString.length - 1]);
+        if (allString.length > 3 && allString[allString.length - 2].equals("")) {
+            taskHistoryCopy = historyFromString(allString[allString.length - 1]);
+        }
 
         //работаем со списком таскмапы, полученным из загруженного файла
         for (String taskStr : taskMapCopy) {
@@ -319,11 +384,16 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             }
         }
 
-        for (Integer taskID : taskHistoryCopy) {
-            inMemoryHistoryManager.add(fileBackedTasksManager.taskMap.get(taskID));
+        if (taskHistoryCopy != null) {
+            for (Integer taskID : taskHistoryCopy) {
+                inMemoryHistoryManager.add(fileBackedTasksManager.taskMap.get(taskID));
+            }
         }
 
-        return  fileBackedTasksManager;
+        fileBackedTasksManager.setInMemoryHistoryManager(inMemoryHistoryManager);
+
+
+        return fileBackedTasksManager;
     }
 
     public static void main(String[] args) {
@@ -335,53 +405,65 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
         Task firstTask = new Task("Task 1",
                 "Первая задача",
-                Status.NEW);
-        taskManager.loadTask(firstTask);
+                Status.NEW, "25.02.2023|15:00", 10);
 
         Task secondTask = new Task("Task 2",
                 "Вторая задача",
+                Status.NEW, "25.02.2023|14:00", 120);
+
+        Task threeTask3 = new Task("Task 3",
+                "Третья задача",
                 Status.NEW);
-        taskManager.loadTask(secondTask);
-        //===================================================================
-        //System.out.println("Создание эпика и три подзадачи в нем");
 
         Epic firstEpicTask = new Epic("Epic 1",
                 "Первый Эпик");
-        taskManager.loadEpicTask(firstEpicTask);
 
         SubTask firstStep = new SubTask("SubTask 1 Epic 1",
                 "Первая подзадача Эпика 1",
-                Status.IN_PROGRESS,
+                Status.IN_PROGRESS,"17.02.2023|12:00", 120,
                 firstEpicTask.getId());
-        taskManager.loadSubTask(firstStep);
 
         SubTask secondStep = new SubTask("SubTask 2 Epic 1",
                 "Вторая подзадача Эпика 1",
-                Status.DONE,
+                Status.DONE,"17.02.2023|13:00", 120,
                 firstEpicTask.getId());
-        taskManager.loadSubTask(secondStep);
 
         SubTask thirdStep = new SubTask("SubTask 3 Epic 1",
                 "Третья подзадача Эпика 1",
-                Status.DONE,
-                firstEpicTask.getId());
-        taskManager.loadSubTask(thirdStep);
+                Status.DONE,firstEpicTask.getId());
 
-        //===================================================================
-        //System.out.println("Создание эпика без подзадач в нем");
+        SubTask fourthStep = new SubTask("SubTask 4 Epic 1",
+                "Четвертая подзадача Эпика 1",
+                Status.DONE,"19.02.2023|13:00", 10,
+                firstEpicTask.getId());
 
         Epic secondEpicTask = new Epic("Epic 2",
                 "Второй Эпик");
+
+        taskManager.loadTask(firstTask);
+        taskManager.loadTask(secondTask);
+        taskManager.loadTask(threeTask3);
+        taskManager.loadEpicTask(firstEpicTask);
+        taskManager.loadSubTask(firstStep);
+        taskManager.loadSubTask(secondStep);
+        taskManager.loadSubTask(thirdStep);
+        taskManager.loadSubTask(fourthStep);
         taskManager.loadEpicTask(secondEpicTask);
 
         taskManager.getSubTask(5);
-        taskManager.getEpic(3);
-        taskManager.getTask(1);
-        taskManager.getSubTask(4);
+        taskManager.getEpic(4);
         taskManager.getTask(2);
+        taskManager.getTask(1);
         taskManager.getSubTask(6);
+        taskManager.getTask(2);
+        taskManager.getSubTask(7);
+        taskManager.getEpic(9);
 
-        System.out.println("Создали второй менеджер и загрузили задачи из файла: " + file.getAbsolutePath());
+//        System.out.println("Удаление задач");
+//        taskManager.removeTask(2);
+//        taskManager.removeSubTask(6);
+
+        System.out.println("\nСоздали второй менеджер и загрузили задачи из файла: " + file.getAbsolutePath());
         TaskManager loadFromFile = loadFromFile(file);
 
         System.out.println();
@@ -395,5 +477,10 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         for (Task task: loadFromFile.getTaskMap().values()) {
             System.out.println(task);
         }
+
+        System.out.println("\nОтсортированный список");
+        taskManager.getPrioritizedTasks();
+
     }
+
 }

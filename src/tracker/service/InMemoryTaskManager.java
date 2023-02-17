@@ -1,4 +1,5 @@
 
+
 package tracker.service;
 
 import tracker.model.Epic;
@@ -6,32 +7,91 @@ import tracker.model.SubTask;
 import tracker.model.Task;
 import tracker.util.Managers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.*;
 
 import static tracker.util.Status.*;
 import static tracker.util.TaskType.*;
 
 public class InMemoryTaskManager implements TaskManager {
 
+    protected static HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
+
     // Cписок всех задач.
-    protected final HashMap <Integer, Task> taskMap = new HashMap<>();
+    protected final HashMap<Integer, Task> taskMap = new HashMap<>();
     // Список всех эпик задач.
-    protected final HashMap <Integer, Epic> epicMap = new HashMap<>();
+    protected final HashMap<Integer, Epic> epicMap = new HashMap<>();
     // Список всех подзадач.
-    protected final HashMap <Integer, SubTask> subTaskMap = new HashMap<>();
+    protected final HashMap<Integer, SubTask> subTaskMap = new HashMap<>();
+
+    // Создаем поле флаг. Проверяем не пустой ли у нас список, если пустой то значение флага не изменилось и мы добавляем
+    // задачу в список. Потом проверяем на условия пересечения задач. Тут у нас может быть два случая выдающих исключение.
+    // Первый случай если обрабатываемая задача без старттайм, тогда мы считаем, что пересечения невозможны и добавляем
+    // ее в список (она упадет в конец). И второй случай - это если задача из списка без старттайма, это значит что мы
+    // прошли весь список до самого конца (где все задачи без старттайма), а значит можем добавить задачу в список. Когда
+    // же мы находим пересечение, то меняем значение флага записываем имя проблемной задачи. Проверяем значение флага,
+    // если изменение было - выдаем об этом сообщение если нет добавляем файл.
+    public void addTaskInSet(Task task) {
+
+        boolean flag = false;
+
+        if (prioritizedMap.isEmpty()) {
+
+        } else {
+
+            try {
+
+                for (Task priorTask : prioritizedMap) {
+
+                    if (task.getStartTime().isBefore(priorTask.getEndTime()) && task.getStartTime().isAfter(priorTask.getStartTime())
+                            || task.getStartTime().isBefore(priorTask.getStartTime()) && task.getEndTime().isAfter(priorTask.getStartTime())) {
+                        flag = true;
+                        break;
+                    }
+                }
+
+            } catch (NullPointerException e) {
+                flag = false;
+            }
+        }
+
+        if (flag) {
+            System.out.println("пересечение во времени, задача " + task.getName() + " не смогла быть добавлена в отсортированный список задач");
+        } else {
+            prioritizedMap.add(task);
+        }
+    }
+
+    protected final Set<Task> prioritizedMap = new TreeSet<>((o1, o2) -> {
+
+        if (o1.getStartTime() == null || o2.getStartTime() == null) {
+            return 1;
+        } else {
+            return o1.getStartTime().compareTo(o2.getStartTime());
+        }
+
+//        try {
+//            return o1.getStartTime().compareTo(o2.getStartTime());
+//        } catch (NullPointerException e) {
+//            return 1;
+//        }
+
+    });
+
+    public void getPrioritizedTasks() {
+
+        for (Task task : prioritizedMap) {
+            System.out.println(task.getStartTimeString() + " - " + task.getEndTimeString() + " " + task.getName());
+        }
+    }
 
     private static int id = 1;
-
-    protected static final HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
 
     // Принимаем список из поля inMemoryHistoryManager, проверяем не пустой ли он, и если он не пустой то выводим в
     // консоль все его содержимое. Если список пустой, то говорим что список истории задач пуст.
     public void printHistoryList() {
 
-        if (!inMemoryHistoryManager.getHistory().isEmpty()) {
-
+        if (inMemoryHistoryManager.getHistory() != null) {
             System.out.println("История запросов:");
             for (Task task : inMemoryHistoryManager.getHistory()) {
                 System.out.println(task);
@@ -39,6 +99,10 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             System.out.println("Cписок истории задач пуст");
         }
+    }
+
+    public List<Task> getHistory(){
+        return inMemoryHistoryManager.getHistory();
     }
 
     // На вход метода подается задача, если там не null, то загружаем ее в общий список задач. Если на вход пришел
@@ -49,11 +113,10 @@ public class InMemoryTaskManager implements TaskManager {
         if (task != null) {
             taskMap.put(task.getId(), task);
             instalTaskType(task);
+            addTaskInSet(task);
         } else {
             System.out.println("Сбой, задача не найдена.");
         }
-
-
     }
 
     // На вход метода подается Эпик задача, если там не null, то загружаем ее в общий список задач и список эпиков.
@@ -64,8 +127,10 @@ public class InMemoryTaskManager implements TaskManager {
         if (epic != null) {
             taskMap.put(epic.getId(), epic);
             epicMap.put(epic.getId(), epic);
-            instalStatusEpic(epic);
+
             instalTaskType(epic);
+            instalStatusEpic(epic);
+
         } else {
             System.out.println("Сбой, задача не найдена.");
         }
@@ -83,8 +148,11 @@ public class InMemoryTaskManager implements TaskManager {
             epicMap.get(subTask.getEpic()).getSubTaskList().add(subTask.getId());
             taskMap.put(subTask.getId(), subTask);
             subTaskMap.put(subTask.getId(), subTask);
-            instalStatusEpic(epicMap.get(subTask.getEpic()));
+
             instalTaskType(subTask);
+            instalStatusEpic(epicMap.get(subTask.getEpic()));
+            addTaskInSet(subTask);
+
         } else {
             System.out.println("Сбой, задача не найдена.");
         }
@@ -113,6 +181,15 @@ public class InMemoryTaskManager implements TaskManager {
     // Удаление всех эпик задач.
     @Override
     public void deleteAllEpic() {
+
+        List<Integer> epicKey = new ArrayList<>(epicMap.keySet());
+
+        if (!epicKey.isEmpty()) {
+            for (Integer keyId : epicKey) {
+                taskMap.remove(keyId);
+            }
+        }
+
         epicMap.clear();
         subTaskMap.clear();
     }
@@ -120,6 +197,19 @@ public class InMemoryTaskManager implements TaskManager {
     // Удаление всех подзадач.
     @Override
     public void deleteAllSubTask() {
+
+        List<Integer> subTaskKey = new ArrayList<>(subTaskMap.keySet());
+
+        if (!subTaskKey.isEmpty()) {
+            for (Integer keyId : subTaskKey) {
+                taskMap.remove(keyId);
+            }
+        }
+
+        for (Integer epicId : epicMap.keySet()) {
+            epicMap.get(epicId).getSubTaskList().clear();
+        }
+
         subTaskMap.clear();
     }
 
@@ -163,6 +253,52 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             epic.setStatus(IN_PROGRESS);
         }
+
+        instalStartTimeAndDuration(epic);
+    }
+
+    //Проверяем не пустой ли у нас список подзадач в эпике, если пустой то говорим что нет старта и продолжительност = 0
+    //Если список не пустой, то создаем две переменной класса Локал и одну с длительностью, и проходя цикл находим наиранний
+    //старт в наших подзадачах И наипоздний конец, а так же сумму длительности все х подзадач. Потом загружаем все в наш эпик.
+    public void instalStartTimeAndDuration(Epic epic) {
+
+        LocalDateTime dataStartTime;
+        LocalDateTime dataEndTime;
+        int duration;
+
+        if (epic.getSubTaskList().isEmpty()) {
+            epic.setStartTimeString("время начала не указано");
+            epic.setDuration(0);
+        } else {
+
+            dataStartTime = taskMap.get(epic.getSubTaskList().get(0)).getStartTime();
+            dataEndTime = taskMap.get(epic.getSubTaskList().get(0)).getEndTime();
+            duration = taskMap.get(epic.getSubTaskList().get(0)).getDuration();
+
+            for (int i = 1; i < epic.getSubTaskList().size(); i++) {
+
+                try {
+                    if (taskMap.get(epic.getSubTaskList().get(i)).getStartTime().isBefore(dataStartTime)) {
+                        dataStartTime = taskMap.get(epic.getSubTaskList().get(i)).getStartTime();
+                    }
+
+                    duration += taskMap.get(epic.getSubTaskList().get(i)).getDuration();
+
+                    if (taskMap.get(epic.getSubTaskList().get(i)).getEndTime().isAfter(dataEndTime)) {
+                        dataEndTime = taskMap.get(epic.getSubTaskList().get(i)).getEndTime();
+                    }
+                } catch (NullPointerException e) {
+
+                }
+            }
+//            если назначить так, то изменится длительность, будет не сумма разница между началом и концом.
+//            Duration d = Duration.between(dataStartTime, dataEndTime);
+//            duration = (int) (d.getSeconds()/60);
+
+            epic.setStartTime(dataStartTime);
+            epic.setDuration(duration);
+            epic.setEndTime(dataEndTime);
+        }
     }
 
     public static void instalTaskType(Task task){
@@ -184,9 +320,10 @@ public class InMemoryTaskManager implements TaskManager {
     public void updateTask (Task task) {
 
         if (task != null && taskMap.containsKey(task.getId())) {
+            instalTaskType(task);
             taskMap.put(task.getId(), task);
         } else {
-            System.out.println("Сбой, задача не найдена.");
+            //System.out.println("Сбой, задача не найдена.");
         }
     }
 
@@ -194,14 +331,15 @@ public class InMemoryTaskManager implements TaskManager {
     // не пришел ли на вход метода null, если находим ее там то обновляем в общем списке и списке эпиков. После этого
     // обновляем и статус задачи. Если на вход пришел null, то выводим пользователю, что задача не найдена.
     @Override
-    public void updateTask (Epic epic) {
+    public void updateEpic (Epic epic) {
 
         if (epic != null && taskMap.containsKey(epic.getId())) {
+            instalTaskType(epic);
             taskMap.put(epic.getId(), epic);
             epicMap.put(epic.getId(), epic);
             instalStatusEpic(epic);
         } else {
-            System.out.println("Сбой, задача не найдена.");
+            //System.out.println("Сбой, задача не найдена.");
         }
     }
 
@@ -213,11 +351,12 @@ public class InMemoryTaskManager implements TaskManager {
     public void updateSubTask (SubTask subTask) {
 
         if (subTask != null && taskMap.containsKey(subTask.getId())) {
+            instalTaskType(subTask);
             taskMap.put(subTask.getId(), subTask);
             subTaskMap.put(subTask.getId(), subTask);
             instalStatusEpic(epicMap.get(subTask.getEpic()));
         } else {
-            System.out.println("Сбой, задача не найдена.");
+            // System.out.println("Сбой, задача не найдена.");
         }
     }
 
@@ -252,6 +391,7 @@ public class InMemoryTaskManager implements TaskManager {
             epicMap.remove(id);
 
             inMemoryHistoryManager.remove(id);
+
 
         } else {
             System.out.println("Сбой, задача не найдена.");
@@ -294,9 +434,8 @@ public class InMemoryTaskManager implements TaskManager {
         if ((taskMap.get(id) != null) && !(taskMap.get(id) instanceof SubTask) && !(taskMap.get(id) instanceof Epic)) {
             returnTask =  taskMap.get(id);
             inMemoryHistoryManager.add(taskMap.get(id));
-        } else {
-            System.out.println("Такой Task задачи не найдено");
         }
+
         return returnTask;
     }
 
@@ -306,14 +445,14 @@ public class InMemoryTaskManager implements TaskManager {
     // Если какое-то условие не выполнено, выводим на экран, что такой subTask задачи не найдено.
     @Override
     public SubTask getSubTask(int id) {
+
         SubTask returnSubTask = null;
 
         if (taskMap.get(id) != null && taskMap.get(id) instanceof SubTask subTask) {
             returnSubTask =  subTask;
             inMemoryHistoryManager.add(taskMap.get(id));
-        } else {
-            System.out.println("Такой subTask задачи не найдено");
         }
+
         return returnSubTask;
 
     }
@@ -329,49 +468,16 @@ public class InMemoryTaskManager implements TaskManager {
         if (taskMap.get(id) != null && taskMap.get(id) instanceof Epic epic){
             returnEpic = epic;
             inMemoryHistoryManager.add(taskMap.get(id));
-        } else {
-            System.out.println("Такой Epic задачи не найдено");
         }
         return returnEpic;
     }
 
+    public void setInMemoryHistoryManager(HistoryManager inMemoryHistoryManager) {
+        this.inMemoryHistoryManager = inMemoryHistoryManager;
+    }
+
     public static int getId() {
         return id++;
-    }
-
-    // Получение списка подзадач определенного эпика
-    // Обращаемся к списку задач указанного эпика и если он не пустой, выдаем все подзадачи с айди из этого списка,
-    // иначе говорим что у данного эпика нет подзадач.
-    public List<SubTask> getListSubTaSkForEpic(Epic epic) {
-        List<SubTask> listSubTaSkForEpic = new ArrayList<>();
-
-        if (epic.getSubTaskList() != null) {
-            for (Integer subTaskId : epic.getSubTaskList()) {
-                listSubTaSkForEpic.add(subTaskMap.get(subTaskId));
-            }
-            return listSubTaSkForEpic;
-        }
-        System.out.println("Список пуст, у данного эпика нет подзадач");
-        return null;
-    }
-
-    // Метод проверки завершения задачи (true - задача завершена)
-    public boolean isEndedTask(Task task) {
-
-        boolean flag = false;
-        switch (task.getStatus()) {
-            case NEW:
-                task.setStatus(NEW);
-                break;
-            case IN_PROGRESS:
-                task.setStatus(IN_PROGRESS);
-                flag = false;
-                break;
-            case DONE:
-                task.setStatus(DONE);
-                flag = true;
-        }
-        return flag;
     }
 
 }

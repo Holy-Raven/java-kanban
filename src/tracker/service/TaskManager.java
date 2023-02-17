@@ -22,7 +22,7 @@ public interface TaskManager {
     void instalStatusEpic(Epic epic);
 
     void updateTask (Task task);
-    void updateTask (Epic epic);
+    void updateEpic (Epic epic);
     void updateSubTask (SubTask subTask);
 
     void removeTask(int id);
@@ -34,5 +34,5 @@ public interface TaskManager {
     Epic getEpic(int id);
 
     void printHistoryList();
-
+    void getPrioritizedTasks();
 }

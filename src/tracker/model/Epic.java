@@ -2,6 +2,7 @@ package tracker.model;
 
 import tracker.util.Status;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,11 +12,18 @@ public class Epic extends Task {
 
     public Epic(String name, String description) {
         super(name, description);
+
     }
 
-    public Epic(String name, String description, int id, Status status) {
-        super(name, description, id, status);
+    public Epic(String name, String description, int id) {
+        super(name, description, id);
     }
+
+    public Epic(String name, String description, int id, Status status, String startTime, int duration) {
+        super(name, description, id, status, startTime, duration);
+    }
+
+
 
     public List<Integer> getSubTaskList() {
         return subTaskList;
@@ -29,6 +37,9 @@ public class Epic extends Task {
                 ", id=" + getId() +
                 ", status=" + getStatus() +
                 ", taskType=" + getTaskType() +
+                ", startTime=" + getStartTimeString() +
+                ", duration=" + getDuration() +
+                ", endTime=" + getEndTimeString() +
                 '}';
     }
 }
