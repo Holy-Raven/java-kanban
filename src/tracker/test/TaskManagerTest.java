@@ -18,7 +18,6 @@ public abstract class TaskManagerTest <T extends TaskManager> {
 
     public T taskManager;
 
-
     @Test
     void loadTaskTest(){
 
@@ -847,6 +846,94 @@ public abstract class TaskManagerTest <T extends TaskManager> {
         assertNotEquals(firstStep, copySubTask);
         // потому что copyTask == null
         assertEquals(null, copySubTask);
+
+    }
+
+    @Test
+    void intersectionTaskInSetTest() {
+
+        // Создаем задачи
+        Task firstTask = new Task("Task 1",
+                "Первая задача",
+                Status.NEW, "25.02.2023|15:00", 10);
+
+        Task secondTask = new Task("Task 2",
+                "Вторая задача",
+                Status.NEW, "25.02.2023|14:00", 120);
+
+        Task threeTask3 = new Task("Task 3",
+                "Третья задача",
+                Status.NEW);
+
+        Epic firstEpicTask = new Epic("Epic 1",
+                "Первый Эпик");
+
+        SubTask firstStep = new SubTask("SubTask 1 Epic 1",
+                "Первая подзадача Эпика 1",
+                Status.IN_PROGRESS,"17.02.2023|12:00", 120,
+                firstEpicTask.getId());
+
+        SubTask secondStep = new SubTask("SubTask 2 Epic 1",
+                "Вторая подзадача Эпика 1",
+                Status.DONE,"17.02.2023|13:00", 120,
+                firstEpicTask.getId());
+
+        SubTask thirdStep = new SubTask("SubTask 3 Epic 1",
+                "Третья подзадача Эпика 1",
+                Status.DONE,firstEpicTask.getId());
+
+        SubTask fourthStep = new SubTask("SubTask 4 Epic 1",
+                "Четвертая подзадача Эпика 1",
+                Status.DONE,"19.02.2023|13:00", 10,
+                firstEpicTask.getId());
+
+        Epic secondEpicTask = new Epic("Epic 2",
+                "Второй Эпик");
+
+        // Проверим пустой ли наш список изначально
+        assertNull(taskManager.getPrioritizedTasks());
+
+        // Загружаем
+        taskManager.loadTask(firstTask);
+        taskManager.loadTask(secondTask);
+        taskManager.loadTask(threeTask3);
+        taskManager.loadEpicTask(firstEpicTask);
+        taskManager.loadSubTask(firstStep);
+        taskManager.loadSubTask(secondStep);
+        taskManager.loadSubTask(thirdStep);
+        taskManager.loadSubTask(fourthStep);
+        taskManager.loadEpicTask(secondEpicTask);
+
+        // Task 2 и SubTask 2 Epic 1 имеют перечения во времени, они не будут добавлены
+        // Проверим ести ли зти задачи в нашем списке
+
+        assertFalse(taskManager.getPrioritizedTasks().contains(secondTask));
+        assertFalse(taskManager.getPrioritizedTasks().contains(secondTask));
+
+        // Проверим размер нашего отсортированного списка задач, без Task 2 и SubTask 2 Epic 1 должно быть
+        // Epic мы сюда не загружаем итого должно быть 5
+        assertEquals(5, taskManager.getPrioritizedTasks().size());
+
+        // проверим верно ли установилось время нашего Эпика
+        assertEquals(firstEpicTask.getStartTimeString(), firstStep.getStartTimeString());
+        assertEquals(firstEpicTask.getEndTimeString(), fourthStep.getEndTimeString());
+
+        // Проверим в нужном ли месте находятся задачи которые не имеют стратового времени, создадим копия списка
+        List<Task> list = new ArrayList<>();
+
+        for (Task prioritizedTask : taskManager.getPrioritizedTasks()) {
+            list.add(prioritizedTask);
+        }
+
+        // Cперва в конец упал  Task 3, потом SubTask 4 и занял последнее место в списке
+        assertEquals(threeTask3, list.get(list.size()-2));
+        assertEquals(thirdStep, list.get(list.size()-1));
+
+        // Теперь удалим из менеджера одну Task 1
+        taskManager.removeTask(firstTask.getId());
+
+        // В нашем списке должно остаться 4 задачи
+        assertEquals(4, taskManager.getPrioritizedTasks().size());
 
     }
 

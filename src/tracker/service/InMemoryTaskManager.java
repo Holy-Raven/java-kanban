@@ -1,5 +1,4 @@
 
-
 package tracker.service;
 
 import tracker.model.Epic;
@@ -15,6 +14,8 @@ import static tracker.util.TaskType.*;
 
 public class InMemoryTaskManager implements TaskManager {
 
+    private static int id = 1;
+
     protected static HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
 
     // Cписок всех задач.
@@ -23,6 +24,22 @@ public class InMemoryTaskManager implements TaskManager {
     protected final HashMap<Integer, Epic> epicMap = new HashMap<>();
     // Список всех подзадач.
     protected final HashMap<Integer, SubTask> subTaskMap = new HashMap<>();
+
+    protected Set<Task> prioritizedMap = new TreeSet<>((o1, o2) -> {
+
+        if (o1.getStartTime() == null || o2.getStartTime() == null) {
+            return 1;
+        } else {
+            return o1.getStartTime().compareTo(o2.getStartTime());
+        }
+
+//        try {
+//            return o1.getStartTime().compareTo(o2.getStartTime());
+//        } catch (NullPointerException e) {
+//            return 1;
+//        }
+
+    });
 
     // Создаем поле флаг. Проверяем не пустой ли у нас список, если пустой то значение флага не изменилось и мы добавляем
     // задачу в список. Потом проверяем на условия пересечения задач. Тут у нас может быть два случая выдающих исключение.
@@ -62,30 +79,34 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    protected final Set<Task> prioritizedMap = new TreeSet<>((o1, o2) -> {
+    public void removeTaskFromSet(Task task) {
 
-        if (o1.getStartTime() == null || o2.getStartTime() == null) {
-            return 1;
+        if (task != null){
+            prioritizedMap.remove(task);
         } else {
-            return o1.getStartTime().compareTo(o2.getStartTime());
+            System.out.println("ошибка");
         }
 
-//        try {
-//            return o1.getStartTime().compareTo(o2.getStartTime());
-//        } catch (NullPointerException e) {
-//            return 1;
-//        }
+    }
 
-    });
+    public void printPrioritizedTasks() {
 
-    public void getPrioritizedTasks() {
-
-        for (Task task : prioritizedMap) {
+        for (Task task : getPrioritizedTasks()) {
             System.out.println(task.getStartTimeString() + " - " + task.getEndTimeString() + " " + task.getName());
         }
     }
 
-    private static int id = 1;
+    public Set<Task> getPrioritizedTasks() {
+
+        Set<Task> setList = null;
+
+        if (!prioritizedMap.isEmpty()) {
+            setList = prioritizedMap;
+        }
+
+        return setList;
+    }
+
 
     // Принимаем список из поля inMemoryHistoryManager, проверяем не пустой ли он, и если он не пустой то выводим в
     // консоль все его содержимое. Если список пустой, то говорим что список истории задач пуст.
@@ -291,9 +312,6 @@ public class InMemoryTaskManager implements TaskManager {
 
                 }
             }
-//            если назначить так, то изменится длительность, будет не сумма разница между началом и концом.
-//            Duration d = Duration.between(dataStartTime, dataEndTime);
-//            duration = (int) (d.getSeconds()/60);
 
             epic.setStartTime(dataStartTime);
             epic.setDuration(duration);
@@ -366,6 +384,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeTask(int id) {
         if (taskMap.containsKey(id)) {
+            removeTaskFromSet(taskMap.get(id));           //Удаляем задачу из списка приоритетов
             taskMap.remove(id);
 
             inMemoryHistoryManager.remove(id);
@@ -383,10 +402,13 @@ public class InMemoryTaskManager implements TaskManager {
 
         if (epicMap.containsKey(id)) {
             for (Integer idSubTask : epicMap.get(id).getSubTaskList()) {
+                removeTaskFromSet(taskMap.get(idSubTask));           //Удаляем подзадачу из списка приоритетов
                 subTaskMap.remove(idSubTask);
                 taskMap.remove(idSubTask);
                 inMemoryHistoryManager.remove(idSubTask);
             }
+
+            removeTaskFromSet(taskMap.get(id));                      //Удаляем эпик из списка приоритетов
             taskMap.remove(id);
             epicMap.remove(id);
 
@@ -410,11 +432,12 @@ public class InMemoryTaskManager implements TaskManager {
             Integer idEpicParent = subTaskMap.get(id).getEpic();
             epicMap.get(idEpicParent).getSubTaskList().remove(id);
 
+            removeTaskFromSet(taskMap.get(id));           //Удаляем задачу из списка приоритетов
+
             taskMap.remove(id);
             subTaskMap.remove(id);
 
             inMemoryHistoryManager.remove(id);            //удаляем подзадачу из списка просмотров
-
             instalStatusEpic(epicMap.get(idEpicParent));
 
 

@@ -4,6 +4,7 @@ import tracker.model.Epic;
 import tracker.model.SubTask;
 import tracker.model.Task;
 import java.util.HashMap;
+import java.util.Set;
 
 public interface TaskManager {
 
@@ -34,5 +35,7 @@ public interface TaskManager {
     Epic getEpic(int id);
 
     void printHistoryList();
-    void getPrioritizedTasks();
+
+    Set<Task> getPrioritizedTasks();
+    void printPrioritizedTasks();
 }
