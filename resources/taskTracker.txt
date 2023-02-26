@@ -6,5 +6,3 @@ id, type, name, status, description, startTime, duration, endTime, taskType, epi
 6,SUBTASK,SubTask 2 Epic 1,DONE,Вторая подзадача Эпика 1,17.02.2023|13:00,120,17.02.2023|15:00,SUBTASK,4
 7,SUBTASK,SubTask 3 Epic 1,DONE,Третья подзадача Эпика 1,время начала не указано,0,нет начала значит нет и конца,SUBTASK,4
 9,EPIC,Epic 2,NEW,Второй Эпик,время начала не указано,0,нет начала значит нет и конца,EPIC,
-
-5,4,6,2,7,9,
