@@ -1,5 +1,6 @@
 package server.pojo;
 
+import tracker.util.Status;
 import tracker.util.TaskType;
 
 import java.util.ArrayList;
@@ -20,10 +21,16 @@ public class PojoEpic extends PojoTask{
     public PojoEpic(String name,
                     String description,
                     int id,
+                    Status status,
                     TaskType taskType,
                     String startTime,
                     String endTime,
                     int duration) {
-        super(name, description, id, taskType, startTime, endTime, duration);
+        super(name, description, id, status, taskType, startTime, endTime, duration);
+    }
+
+    public PojoEpic(String name, String description) {
+        super(name, description);
+        this.subTaskList = subTaskList;
     }
 }

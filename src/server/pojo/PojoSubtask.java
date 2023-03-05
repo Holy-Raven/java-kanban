@@ -1,14 +1,17 @@
 package server.pojo;
 
+import tracker.util.Status;
 import tracker.util.TaskType;
 
 public class PojoSubtask extends PojoTask {
+
 
     private int epicId;
 
     public PojoSubtask (String name,
                         String description,
                         int id,
+                        Status status,
                         TaskType taskType,
                         String startTime,
                         String endTime,
@@ -16,7 +19,7 @@ public class PojoSubtask extends PojoTask {
                         int epicId
     ) {
 
-        super(name, description, id, taskType, startTime, endTime, duration);
+        super(name, description, id, status, taskType, startTime, endTime, duration);
         this.epicId = epicId;
     }
 

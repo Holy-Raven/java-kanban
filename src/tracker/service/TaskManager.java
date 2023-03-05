@@ -1,11 +1,14 @@
+
 package tracker.service;
 
 import tracker.model.Epic;
 import tracker.model.SubTask;
 import tracker.model.Task;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+
 
 public interface TaskManager {
 
@@ -35,8 +38,11 @@ public interface TaskManager {
     SubTask getSubTask(int id);
     Epic getEpic(int id);
 
-    void printHistoryList();
-    List<Task> getHistory();
+
     Set<Task> getPrioritizedTasks();
     void printPrioritizedTasks();
+
+    List<Task> getHistory();
+
+    void printHistoryList();
 }

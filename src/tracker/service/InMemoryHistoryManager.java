@@ -12,7 +12,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     private int size = 0;
 
-    private final HashMap<Integer, Node> mapHistory = new HashMap<>();
+    private HashMap<Integer, Node> mapHistory = new HashMap<>();
 
     private static final int LIST_HISTORY_SIZE = 10;
 
@@ -32,7 +32,10 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public void remove(int id) {
 
-        removeNode(mapHistory.get(id));
+        if (mapHistory.containsKey(id)) {
+            removeNode(mapHistory.get(id));
+
+        }
     }
 
     //возвращаем результат метод getTask()
@@ -126,6 +129,5 @@ public class InMemoryHistoryManager implements HistoryManager {
             this.next = next;
         }
     }
-
 
 }

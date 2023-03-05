@@ -16,7 +16,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     private static int id = 1;
 
-    protected static HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
+    protected HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
 
     // Cписок всех задач.
     protected final HashMap<Integer, Task> taskMap = new HashMap<>();
@@ -107,9 +107,9 @@ public class InMemoryTaskManager implements TaskManager {
         return setList;
     }
 
-
     // Принимаем список из поля inMemoryHistoryManager, проверяем не пустой ли он, и если он не пустой то выводим в
     // консоль все его содержимое. Если список пустой, то говорим что список истории задач пуст.
+    @Override
     public void printHistoryList() {
 
         if (inMemoryHistoryManager.getHistory() != null) {
@@ -122,6 +122,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
+    @Override
     public List<Task> getHistory(){
         return inMemoryHistoryManager.getHistory();
     }
@@ -194,9 +195,17 @@ public class InMemoryTaskManager implements TaskManager {
     // Удаление всех задач.
     @Override
     public void deleteAllTask() {
-        taskMap.clear();
-        epicMap.clear();
-        subTaskMap.clear();
+
+        deleteAllEpic();
+
+        List<Integer> list = new ArrayList<>(taskMap.keySet());
+
+        if (!list.isEmpty()) {
+            for (Integer id : list) {
+                removeTask(id);
+            }
+        }
+        prioritizedMap.clear();
     }
 
     // Удаление всех эпик задач.
@@ -207,12 +216,9 @@ public class InMemoryTaskManager implements TaskManager {
 
         if (!epicKey.isEmpty()) {
             for (Integer keyId : epicKey) {
-                taskMap.remove(keyId);
+                removeEpicTask(keyId);
             }
         }
-
-        epicMap.clear();
-        subTaskMap.clear();
     }
 
     // Удаление всех подзадач.
@@ -221,17 +227,17 @@ public class InMemoryTaskManager implements TaskManager {
 
         List<Integer> subTaskKey = new ArrayList<>(subTaskMap.keySet());
 
-        if (!subTaskKey.isEmpty()) {
-            for (Integer keyId : subTaskKey) {
-                taskMap.remove(keyId);
-            }
-        }
-
         for (Integer epicId : epicMap.keySet()) {
             epicMap.get(epicId).getSubTaskList().clear();
         }
 
-        subTaskMap.clear();
+        if (!subTaskKey.isEmpty()) {
+            for (Integer keyId : subTaskKey) {
+                removeSubTask(keyId);
+            }
+        }
+
+
     }
 
     // Установка статуса Эпика
@@ -308,7 +314,7 @@ public class InMemoryTaskManager implements TaskManager {
                     if (taskMap.get(epic.getSubTaskList().get(i)).getEndTime().isAfter(dataEndTime)) {
                         dataEndTime = taskMap.get(epic.getSubTaskList().get(i)).getEndTime();
                     }
-                } catch (NullPointerException e) {
+                } catch (NullPointerException ignored) {
 
                 }
             }
@@ -383,11 +389,13 @@ public class InMemoryTaskManager implements TaskManager {
     // Если в списке нет задачи с таким ID то, говорим пользователю, что такой задачи нет, удалить ничего не выйдет.
     @Override
     public void removeTask(int id) {
+
         if (taskMap.containsKey(id)) {
+
             removeTaskFromSet(taskMap.get(id));           //Удаляем задачу из списка приоритетов
             taskMap.remove(id);
 
-            inMemoryHistoryManager.remove(id);
+            //inMemoryHistoryManager.remove(id);
 
         } else {
             System.out.println("Сбой, задача не найдена.");
@@ -401,6 +409,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeEpicTask(int id) {
 
         if (epicMap.containsKey(id)) {
+
             for (Integer idSubTask : epicMap.get(id).getSubTaskList()) {
                 removeTaskFromSet(taskMap.get(idSubTask));           //Удаляем подзадачу из списка приоритетов
                 subTaskMap.remove(idSubTask);
@@ -413,7 +422,6 @@ public class InMemoryTaskManager implements TaskManager {
             epicMap.remove(id);
 
             inMemoryHistoryManager.remove(id);
-
 
         } else {
             System.out.println("Сбой, задача не найдена.");
@@ -502,5 +510,4 @@ public class InMemoryTaskManager implements TaskManager {
     public static int getId() {
         return id++;
     }
-
 }

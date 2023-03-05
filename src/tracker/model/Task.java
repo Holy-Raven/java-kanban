@@ -21,7 +21,6 @@ public class Task  { //implements Comparable<Task>
     protected String endTime;                                                       // Время завершения задачи
     protected int duration;                                                         // Продолжительность задачи в минутах
 
-
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy|HH:mm"); // определите входной формат времени"
 
     public Task(String name, String description, int id, Status status, String startTime, int duration) {
@@ -31,7 +30,11 @@ public class Task  { //implements Comparable<Task>
         this.status = status;
         this.startTime = startTime;
         this.duration = duration;
-        this.endTime = getEndTime().format(formatter);
+        if (getEndTime() == null){
+            this.endTime = null;
+        } else {
+            this.endTime = getEndTime().format(formatter);
+        }
     }
 
     public Task(String name, String description, Status status) {
@@ -44,7 +47,6 @@ public class Task  { //implements Comparable<Task>
         this.endTime = getEndTimeString();
     }
 
-
     public Task(String name, String description, Status status, String startTime, int duration) {
         this.name = name;
         this.description = description;
@@ -52,7 +54,12 @@ public class Task  { //implements Comparable<Task>
         this.status = status;
         this.startTime = startTime;
         this.duration = duration;
-        this.endTime = getEndTime().format(formatter);
+
+        if (getEndTime() == null){
+            this.endTime = null;
+        } else {
+            this.endTime = getEndTime().format(formatter);
+        }
     }
 
     public Task(String name, String description) {

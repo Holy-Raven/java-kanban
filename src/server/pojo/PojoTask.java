@@ -1,6 +1,6 @@
-
 package server.pojo;
 
+import tracker.util.Status;
 import tracker.util.TaskType;
 
 public class PojoTask {
@@ -8,19 +8,35 @@ public class PojoTask {
     private String name;
     private String description;
     private int id;
+    private Status status;
     private TaskType taskType;
     private String startTime;
     private String endTime;
     private int duration;
 
-    public PojoTask(String name, String description, int id, TaskType taskType, String startTime, String endTime, int duration) {
+
+
+    public PojoTask(String name, String description, int id, Status status, TaskType taskType, String startTime, String endTime, int duration) {
         this.name = name;
         this.description = description;
         this.id = id;
+        this.status = status;
         this.taskType = taskType;
         this.startTime = startTime;
         this.endTime = endTime;
         this.duration = duration;
+    }
+
+
+    public PojoTask(String name, String description) {
+        this.name = name;
+        this.description = description;
+        this.id = 0;
+        this.status = null;
+        this.taskType = null;
+        this.startTime = null;
+        this.endTime = null;
+        this.duration = 0;
     }
 
     public String getName() {
@@ -45,6 +61,14 @@ public class PojoTask {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
     public TaskType getTaskType() {
