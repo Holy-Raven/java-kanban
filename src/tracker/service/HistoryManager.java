@@ -10,4 +10,5 @@ public interface HistoryManager {
 
     List<Task> getHistory();
 
+    void clear();
 }

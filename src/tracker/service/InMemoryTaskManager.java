@@ -206,6 +206,7 @@ public class InMemoryTaskManager implements TaskManager {
             }
         }
         prioritizedMap.clear();
+        inMemoryHistoryManager.clear();
     }
 
     // Удаление всех эпик задач.
