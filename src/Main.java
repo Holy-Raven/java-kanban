@@ -53,24 +53,24 @@ public class Main {
         Epic secondEpicTask = new Epic("Epic 2",
                 "Второй Эпик");
 
-        httpTaskServer.taskManager.loadTask(firstTask);
-        httpTaskServer.taskManager.loadTask(secondTask);
-        httpTaskServer.taskManager.loadTask(threeTask3);
-        httpTaskServer.taskManager.loadEpicTask(firstEpicTask);
-        httpTaskServer.taskManager.loadSubTask(firstStep);
-        httpTaskServer.taskManager.loadSubTask(secondStep);
-        httpTaskServer.taskManager.loadSubTask(thirdStep);
-        httpTaskServer.taskManager.loadSubTask(fourthStep);
-        httpTaskServer.taskManager.loadEpicTask(secondEpicTask);
+        httpTaskServer.getTaskManager().loadTask(firstTask);
+        httpTaskServer.getTaskManager().loadTask(secondTask);
+        httpTaskServer.getTaskManager().loadTask(threeTask3);
+        httpTaskServer.getTaskManager().loadEpicTask(firstEpicTask);
+        httpTaskServer.getTaskManager().loadSubTask(firstStep);
+        httpTaskServer.getTaskManager().loadSubTask(secondStep);
+        httpTaskServer.getTaskManager().loadSubTask(thirdStep);
+        httpTaskServer.getTaskManager().loadSubTask(fourthStep);
+        httpTaskServer.getTaskManager().loadEpicTask(secondEpicTask);
 
-        httpTaskServer.taskManager.getSubTask(5);
-        httpTaskServer.taskManager.getEpic(4);
-        httpTaskServer.taskManager.getTask(2);
-        httpTaskServer.taskManager.getTask(1);
-        httpTaskServer.taskManager.getSubTask(6);
-        httpTaskServer.taskManager.getTask(2);
-        httpTaskServer.taskManager.getSubTask(7);
-        httpTaskServer.taskManager.getEpic(9);
+        httpTaskServer.getTaskManager().getSubTask(5);
+        httpTaskServer.getTaskManager().getEpic(4);
+        httpTaskServer.getTaskManager().getTask(2);
+        httpTaskServer.getTaskManager().getTask(1);
+        httpTaskServer.getTaskManager().getSubTask(6);
+        httpTaskServer.getTaskManager().getTask(2);
+        httpTaskServer.getTaskManager().getSubTask(7);
+        httpTaskServer.getTaskManager().getEpic(9);
 
 
 

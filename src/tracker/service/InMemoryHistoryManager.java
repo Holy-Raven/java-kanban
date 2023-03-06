@@ -4,6 +4,8 @@ import tracker.model.Task;
 
 import java.util.*;
 
+import static tracker.util.constants.Constants.LIST_HISTORY_SIZE;
+
 
 public class InMemoryHistoryManager implements HistoryManager {
 
@@ -13,8 +15,6 @@ public class InMemoryHistoryManager implements HistoryManager {
     private int size = 1;
 
     private HashMap<Integer, Node> mapHistory = new HashMap<>();
-
-    private static final int LIST_HISTORY_SIZE = 10;
 
     // Проверяем по ключу есть ли такая нода в мапе истории запросов, если есть то удаляем ее, после этого добавляем ее
     // в конец списка, если же найти ноду не удалось в мапе, то просто добавляем ее в конец списка

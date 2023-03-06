@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static tracker.util.constants.Constants.PORT_KVServer;
 
 /**
  * Постман: https://www.getpostman.com/collections/a83b61d9e1c81c10575c
@@ -17,14 +18,13 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 
 public class KVServer {
-    public static final int PORT = 8078;
     private final String apiToken;
     private final HttpServer server;
     private final Map<String, String> data = new HashMap<>();
 
     public KVServer() throws IOException {
         apiToken = generateApiToken();
-        server = HttpServer.create(new InetSocketAddress("localhost", PORT), 0);
+        server = HttpServer.create(new InetSocketAddress("localhost", PORT_KVServer), 0);
         server.createContext("/register", this::register);
         server.createContext("/save", this::save);
         server.createContext("/load", this::load);
@@ -33,21 +33,16 @@ public class KVServer {
     private void load(HttpExchange h) throws IOException{
 
         try {
-            //System.out.println("\n/load");
             if (!hasAuth(h)) {
-                //System.out.println("Запрос не авторизован, нужен параметр в query API_TOKEN со значением апи-ключа");
                 h.sendResponseHeaders(403, 0);
                 return;
             }
             if ("GET".equals(h.getRequestMethod())) {
                 String key = h.getRequestURI().getPath().substring("/load/".length());
                 if (key.isEmpty() || !data.keySet().contains(key)) {
-                    //System.out.println("Key для сохранения пустой или отсутствует в базе данных. key указывается в пути: /load/{key}");
                     h.sendResponseHeaders(400, 0);
-
                 }
                 sendText(h, data.get(key));
-                //System.out.println("Значение для ключа " + key + " успешно вызвано!");
 
             } else {
                 System.out.println("/load ждёт GET-запрос, а получил: " + h.getRequestMethod());
@@ -80,8 +75,6 @@ public class KVServer {
                     return;
                 }
                 data.put(key, value);
-                //System.out.println(data.values());
-                //System.out.println("Значение для ключа " + key + " успешно обновлено!");
                 h.sendResponseHeaders(200, 0);
             } else {
                 System.out.println("/save ждёт POST-запрос, а получил: " + h.getRequestMethod());
@@ -106,7 +99,7 @@ public class KVServer {
     }
 
     public void start() {
-        System.out.println("Запускаем KVServer на порту " + PORT);
+        System.out.println("Запускаем KVServer на порту " + PORT_KVServer);
         //System.out.println("Открой в браузере http://localhost:" + PORT + "/");
         System.out.println("API_TOKEN: " + apiToken);
         server.start();

@@ -44,7 +44,7 @@ class HttpTaskServerTest {
         httpTaskServer = new HttpTaskServer();
         httpTaskServer.start();
 
-        taskManager = httpTaskServer.taskManager;
+        taskManager = httpTaskServer.getTaskManager();
     }
 
     @BeforeEach

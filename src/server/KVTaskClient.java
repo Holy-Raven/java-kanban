@@ -12,8 +12,8 @@ import java.net.http.HttpResponse;
 
 public class KVTaskClient {
 
-    String API_TOKEN;
-    String url;
+    private String API_TOKEN;
+    private String url;
 
     public KVTaskClient(String url) {
         this.url = url;

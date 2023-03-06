@@ -24,17 +24,16 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import static tracker.service.HttpTaskManager.loadFromServer;
+import static tracker.util.constants.Constants.PORT_HttpServer;
+import static tracker.util.constants.Constants.url;
 import static tracker.util.PojoMappers.*;
 
 // это наш сервер
 public class HttpTaskServer {
 
-    private static final int PORT = 8080;
     private HttpServer httpServer;
-    public  TaskManager taskManager;
+    private TaskManager taskManager;
     private final Gson gson;
-    String url = "http://localhost:8078/";
-
 
     public HttpTaskServer() throws IOException, InterruptedException {
 
@@ -42,11 +41,13 @@ public class HttpTaskServer {
         taskManager = loadFromServer(url, client);
         gson = Managers.getGson();
         httpServer = HttpServer.create();
-        httpServer.bind(new InetSocketAddress(PORT), 0);
+        httpServer.bind(new InetSocketAddress(PORT_HttpServer), 0);
         httpServer.createContext("/tasks", new TaskHandler());
     }
 
-
+    public TaskManager getTaskManager() {
+        return taskManager;
+    }
 
     private int parsePathId(String path) {
         try {
@@ -57,8 +58,8 @@ public class HttpTaskServer {
     }
 
     public void start() {
-        System.out.println("Запускаем HttpTaskServer на порту " + PORT);
-        System.out.println("Открой в браузере http://localhost:" + PORT + "/");
+        System.out.println("Запускаем HttpTaskServer на порту " + PORT_HttpServer);
+        System.out.println("Открой в браузере http://localhost:" + PORT_HttpServer + "/");
         httpServer.start();
     }
 
