@@ -12,6 +12,7 @@ import tracker.model.Epic;
 import tracker.model.SubTask;
 import tracker.model.Task;
 import tracker.service.TaskManager;
+import tracker.util.enums.Endpoint;
 import tracker.util.Managers;
 
 import java.io.IOException;
@@ -29,8 +30,8 @@ import static tracker.util.PojoMappers.*;
 public class HttpTaskServer {
 
     private static final int PORT = 8080;
-    private final HttpServer httpServer;
-    public TaskManager taskManager;
+    private HttpServer httpServer;
+    public  TaskManager taskManager;
     private final Gson gson;
     String url = "http://localhost:8078/";
 

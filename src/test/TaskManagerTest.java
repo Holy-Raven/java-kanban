@@ -1,18 +1,17 @@
 
 package test;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tracker.model.Epic;
 import tracker.model.SubTask;
 import tracker.model.Task;
 import tracker.service.TaskManager;
-import tracker.util.Status;
+import tracker.util.enums.Status;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static tracker.util.Status.*;
+import static tracker.util.enums.Status.*;
 
 public abstract class TaskManagerTest <T extends TaskManager> {
 

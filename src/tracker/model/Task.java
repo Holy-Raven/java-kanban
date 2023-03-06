@@ -2,8 +2,8 @@
 package tracker.model;
 
 import tracker.service.InMemoryTaskManager;
-import tracker.util.Status;
-import tracker.util.TaskType;
+import tracker.util.enums.Status;
+import tracker.util.enums.TaskType;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;

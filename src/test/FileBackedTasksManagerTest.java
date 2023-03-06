@@ -7,7 +7,7 @@ import tracker.model.Epic;
 import tracker.model.SubTask;
 import tracker.model.Task;
 import tracker.service.FileBackedTasksManager;
-import tracker.util.Status;
+import tracker.util.enums.Status;
 
 import java.io.File;
 import java.io.FileWriter;

@@ -1,7 +1,7 @@
 package server.pojo;
 
-import tracker.util.Status;
-import tracker.util.TaskType;
+import tracker.util.enums.Status;
+import tracker.util.enums.TaskType;
 
 public class PojoTask {
 

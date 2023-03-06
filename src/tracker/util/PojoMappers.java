@@ -7,6 +7,7 @@ import server.pojo.PojoTask;
 import tracker.model.Epic;
 import tracker.model.SubTask;
 import tracker.model.Task;
+import tracker.util.enums.TaskType;
 
 public class PojoMappers {
 

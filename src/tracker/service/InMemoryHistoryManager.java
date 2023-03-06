@@ -10,7 +10,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     private Node head;
     private Node tail;
 
-    private int size = 0;
+    private int size = 1;
 
     private HashMap<Integer, Node> mapHistory = new HashMap<>();
 
@@ -20,8 +20,6 @@ public class InMemoryHistoryManager implements HistoryManager {
     // в конец списка, если же найти ноду не удалось в мапе, то просто добавляем ее в конец списка
 
     public void clear(){
-        head = null;
-        tail = null;
         mapHistory.clear();
     }
 
@@ -103,7 +101,6 @@ public class InMemoryHistoryManager implements HistoryManager {
 
         if (mapHistory.containsValue(node)) {
 
-            Node removeNode = node;
             Node prevNode = node.prev;
             Node nextNode = node.next;
 
@@ -119,10 +116,11 @@ public class InMemoryHistoryManager implements HistoryManager {
                 nextNode.prev = prevNode;
             }
 
-            mapHistory.remove(removeNode.data.getId());
+            mapHistory.remove(node.data.getId());
 
             size--;
         }
+
     }
 
     private static class Node<E> {

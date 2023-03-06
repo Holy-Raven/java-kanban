@@ -1,5 +1,5 @@
 
-package server;
+package tracker.util.enums;
 
 public enum Endpoint {
 

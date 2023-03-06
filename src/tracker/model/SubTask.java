@@ -1,7 +1,7 @@
 
 package tracker.model;
 
-import tracker.util.Status;
+import tracker.util.enums.Status;
 
 public class SubTask extends Task {
 

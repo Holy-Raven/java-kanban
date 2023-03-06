@@ -3,8 +3,8 @@ package tracker.service;
 import tracker.model.Epic;
 import tracker.model.SubTask;
 import tracker.model.Task;
-import tracker.util.ManagerSaveException;
-import tracker.util.TaskType;
+import tracker.util.exceptions.ManagerSaveException;
+import tracker.util.enums.TaskType;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -13,7 +13,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-import static tracker.util.Status.*;
+import static tracker.util.enums.Status.*;
 
 public class FileBackedTasksManager extends InMemoryTaskManager implements TaskManager {
 
@@ -116,9 +116,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         save();
         return epic;
     }
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
     protected void save() {
 
         String title = "id, type, name, status, description, startTime, duration, endTime, taskType, epic\n";

@@ -1,7 +1,7 @@
 
 package tracker.model;
 
-import tracker.util.Status;
+import tracker.util.enums.Status;
 
 import java.util.ArrayList;
 import java.util.List;

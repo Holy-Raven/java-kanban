@@ -8,7 +8,7 @@ import tracker.model.SubTask;
 import tracker.model.Task;
 import tracker.service.HistoryManager;
 import tracker.util.Managers;
-import tracker.util.Status;
+import tracker.util.enums.Status;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 

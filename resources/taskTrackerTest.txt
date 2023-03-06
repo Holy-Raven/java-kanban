@@ -1,6 +1,6 @@
 id, type, name, status, description, startTime, duration, endTime, taskType, epic
-167,TASK,Task 1,NEW,Первая задача,25.02.2023|15:00,10,25.02.2023|15:10,TASK,
-168,TASK,Task 2,NEW,Вторая задача,27.02.2023|14:00,120,27.02.2023|16:00,TASK,
-169,EPIC,Epic 1,IN_PROGRESS,Первый Эпик,17.02.2023|12:00,240,17.02.2023|17:00,EPIC,
-170,SUBTASK,SubTask 1 Epic 1,IN_PROGRESS,Первая подзадача Эпика 1,17.02.2023|12:00,120,17.02.2023|14:00,SUBTASK,169
-171,SUBTASK,SubTask 2 Epic 1,DONE,Вторая подзадача Эпика 1,17.02.2023|15:00,120,17.02.2023|17:00,SUBTASK,169
+68,TASK,Task 1,NEW,Первая задача,25.02.2023|15:00,10,25.02.2023|15:10,TASK,
+69,TASK,Task 2,NEW,Вторая задача,27.02.2023|14:00,120,27.02.2023|16:00,TASK,
+70,EPIC,Epic 1,IN_PROGRESS,Первый Эпик,17.02.2023|12:00,240,17.02.2023|17:00,EPIC,
+71,SUBTASK,SubTask 1 Epic 1,IN_PROGRESS,Первая подзадача Эпика 1,17.02.2023|12:00,120,17.02.2023|14:00,SUBTASK,70
+72,SUBTASK,SubTask 2 Epic 1,DONE,Вторая подзадача Эпика 1,17.02.2023|15:00,120,17.02.2023|17:00,SUBTASK,70

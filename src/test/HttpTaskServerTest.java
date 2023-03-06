@@ -3,9 +3,7 @@ package test;
 
 
 import com.google.gson.*;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import server.HttpTaskServer;
 import server.KVServer;
 import server.pojo.PojoEpic;
@@ -14,8 +12,9 @@ import server.pojo.PojoTask;
 import tracker.model.Epic;
 import tracker.model.SubTask;
 import tracker.model.Task;
+import tracker.service.TaskManager;
 import tracker.util.Managers;
-import tracker.util.Status;
+import tracker.util.enums.Status;
 
 import java.io.IOException;
 import java.net.URI;
@@ -31,19 +30,25 @@ import static tracker.util.PojoMappers.*;
 
 class HttpTaskServerTest {
 
-    Gson gson = Managers.getGson();
-    KVServer kvServer;
-    HttpTaskServer httpTaskServer;
+    static Gson gson = Managers.getGson();
+    static KVServer kvServer;
+    static HttpTaskServer httpTaskServer;
+    static TaskManager taskManager;
 
-    @BeforeEach
-    void beforeEach() throws IOException, InterruptedException {
 
+    @BeforeAll
+    public static void beforeAll () throws IOException, InterruptedException {
         kvServer = new KVServer();
         kvServer.start();
 
         httpTaskServer = new HttpTaskServer();
         httpTaskServer.start();
 
+        taskManager = httpTaskServer.taskManager;
+    }
+
+    @BeforeEach
+    public void beforeEach(){
 
         // загрузка и вызов задач
         Task firstTask = new Task("Task 1",
@@ -83,29 +88,34 @@ class HttpTaskServerTest {
         Epic secondEpicTask = new Epic("Epic 2",
                 "Второй Эпик");
 
-        httpTaskServer.taskManager.loadTask(firstTask);
-        httpTaskServer.taskManager.loadTask(secondTask);
-        httpTaskServer.taskManager.loadTask(threeTask3);
-        httpTaskServer.taskManager.loadEpicTask(firstEpicTask);
-        httpTaskServer.taskManager.loadSubTask(firstStep);
-        httpTaskServer.taskManager.loadSubTask(secondStep);
-        httpTaskServer.taskManager.loadSubTask(thirdStep);
-        httpTaskServer.taskManager.loadSubTask(fourthStep);
-        httpTaskServer.taskManager.loadEpicTask(secondEpicTask);
+        taskManager.loadTask(firstTask);
+        taskManager.loadTask(secondTask);
+        taskManager.loadTask(threeTask3);
+        taskManager.loadEpicTask(firstEpicTask);
+        taskManager.loadSubTask(firstStep);
+        taskManager.loadSubTask(secondStep);
+        taskManager.loadSubTask(thirdStep);
+        taskManager.loadSubTask(fourthStep);
+        taskManager.loadEpicTask(secondEpicTask);
 
-        httpTaskServer.taskManager.getSubTask(5);
-        httpTaskServer.taskManager.getEpic(4);
-        httpTaskServer.taskManager.getTask(2);
-        httpTaskServer.taskManager.getTask(1);
-        httpTaskServer.taskManager.getSubTask(6);
-        httpTaskServer.taskManager.getTask(2);
-        httpTaskServer.taskManager.getSubTask(7);
-        httpTaskServer.taskManager.getEpic(9);
+        taskManager.getSubTask(5);
+        taskManager.getEpic(4);
+        taskManager.getTask(2);
+        taskManager.getTask(1);
+        taskManager.getSubTask(6);
+        taskManager.getTask(2);
+        taskManager.getSubTask(7);
+        taskManager.getEpic(9);
 
     }
 
     @AfterEach
-    void afterEach() {
+    public void afterEach() {
+        taskManager.clear();
+    }
+
+    @AfterAll
+    public static void afterAll(){
         httpTaskServer.stop();
         kvServer.stop();
     }
@@ -124,7 +134,7 @@ class HttpTaskServerTest {
 
 
         // Список задач из менеджера
-        List<Task> taskMap = new ArrayList<>(httpTaskServer.taskManager.getTaskMap().values());
+        List<Task> taskMap = new ArrayList<>(taskManager.getTaskMap().values());
 
         // Получили ответ ввиде джейсон файла, десериализваоли его и записали результат в отдельный список
         JsonElement jsonTasks = JsonParser.parseString(response.body());
@@ -162,7 +172,7 @@ class HttpTaskServerTest {
 
 
         // Список эпиков из менеджера
-        List<Epic> epicMap = new ArrayList<>(httpTaskServer.taskManager.getEpicMap().values());
+        List<Epic> epicMap = new ArrayList<>(taskManager.getEpicMap().values());
 
         // Получили ответ ввиде джейсон файла, десериализваоли его и записали результат в отдельный список
         JsonElement jsonEpics = JsonParser.parseString(response.body());
@@ -195,7 +205,7 @@ class HttpTaskServerTest {
 
 
         // Список эпиков из менеджера
-        List<SubTask> subTaskMap = new ArrayList<>(httpTaskServer.taskManager.getSubTaskMap().values());
+        List<SubTask> subTaskMap = new ArrayList<>(taskManager.getSubTaskMap().values());
 
         // Получили ответ ввиде джейсон файла, десериализваоли его и записали результат в отдельный список
         JsonElement jsonSubtask = JsonParser.parseString(response.body());
@@ -236,7 +246,7 @@ class HttpTaskServerTest {
         Task newTask = pojoTaskToTask(gson.fromJson(jsonObject, PojoTask.class));
 
         // сравниваем задачи
-        assertEquals(httpTaskServer.taskManager.getTaskMap().get(2), newTask);
+        assertEquals(taskManager.getTaskMap().get(2), newTask);
 
     }
 
@@ -261,12 +271,12 @@ class HttpTaskServerTest {
         Epic newEpic = pojoEpicToEpic(gson.fromJson(jsonObject, PojoEpic.class));
 
         // сравниваем задачи
-        assertEquals(httpTaskServer.taskManager.getTaskMap().get(4), newEpic);
+        assertEquals(taskManager.getTaskMap().get(4), newEpic);
 
     }
 
     @Test
-    void  getSubTAsk() throws  IOException, InterruptedException {
+    void  getSubTaskId() throws  IOException, InterruptedException {
 
         // исходя из загруженных данных возьмем подзадачу 5
         HttpClient client = HttpClient.newHttpClient();
@@ -286,7 +296,7 @@ class HttpTaskServerTest {
         SubTask subTask = (SubTask) pojoTaskToTask(gson.fromJson(jsonObject, PojoSubtask.class));
 
         // сравниваем задачи
-        assertEquals(httpTaskServer.taskManager.getTaskMap().get(5), subTask);
+        assertEquals(taskManager.getTaskMap().get(5), subTask);
 
     }
 
@@ -304,7 +314,7 @@ class HttpTaskServerTest {
 
 
         // Список задач из менеджера
-        List<Task> history = httpTaskServer.taskManager.getHistory();
+        List<Task> history = taskManager.getHistory();
 
         // Получили ответ ввиде джейсон файла, десериализваоли его и записали результат в отдельный список
         JsonElement jsonTasks = JsonParser.parseString(response.body());
@@ -341,7 +351,7 @@ class HttpTaskServerTest {
 
 
         // Список задач из менеджера
-        List<Task> priority = new ArrayList<>(httpTaskServer.taskManager.getPrioritizedTasks());
+        List<Task> priority = new ArrayList<>(taskManager.getPrioritizedTasks());
 
         // Получили ответ ввиде джейсон файла, десериализваоли его и записали результат в отдельный список
         JsonElement jsonTasks = JsonParser.parseString(response.body());
@@ -376,9 +386,9 @@ class HttpTaskServerTest {
 
         client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        assertTrue(httpTaskServer.taskManager.getTaskMap().isEmpty());
-        assertTrue(httpTaskServer.taskManager.getEpicMap().isEmpty());
-        assertTrue(httpTaskServer.taskManager.getSubTaskMap().isEmpty());
+        assertTrue(taskManager.getTaskMap().isEmpty());
+        assertTrue(taskManager.getEpicMap().isEmpty());
+        assertTrue(taskManager.getSubTaskMap().isEmpty());
 
     }
 
@@ -395,8 +405,8 @@ class HttpTaskServerTest {
         client.send(request, HttpResponse.BodyHandlers.ofString());
 
 
-        assertTrue(httpTaskServer.taskManager.getEpicMap().isEmpty());
-        assertTrue(httpTaskServer.taskManager.getSubTaskMap().isEmpty());
+        assertTrue(taskManager.getEpicMap().isEmpty());
+        assertTrue(taskManager.getSubTaskMap().isEmpty());
 
     }
 
@@ -412,7 +422,7 @@ class HttpTaskServerTest {
 
         client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        assertTrue(httpTaskServer.taskManager.getSubTaskMap().isEmpty());
+        assertTrue(taskManager.getSubTaskMap().isEmpty());
 
     }
 
@@ -430,7 +440,7 @@ class HttpTaskServerTest {
         client.send(request, HttpResponse.BodyHandlers.ofString());
 
         // сравниваем задачи
-        assertFalse(httpTaskServer.taskManager.getTaskMap().containsKey(2));
+        assertFalse(taskManager.getTaskMap().containsKey(2));
 
     }
 
@@ -440,7 +450,7 @@ class HttpTaskServerTest {
         // исходя из загруженных данных удалим эпик 4
         // выгрузим список его подзадач
 
-        List <Integer> list = httpTaskServer.taskManager.getEpic(4).getSubTaskList();
+        List <Integer> list = taskManager.getEpic(4).getSubTaskList();
 
         HttpClient client = HttpClient.newHttpClient();
         URI uriTasks = URI.create("http://localhost:8080/tasks/epic4");
@@ -452,13 +462,13 @@ class HttpTaskServerTest {
         client.send(request, HttpResponse.BodyHandlers.ofString());
 
         // есть ли задача в общем списке и списке эпиков
-        assertFalse(httpTaskServer.taskManager.getTaskMap().containsKey(4));
-        assertFalse(httpTaskServer.taskManager.getEpicMap().containsKey(4));
+        assertFalse(taskManager.getTaskMap().containsKey(4));
+        assertFalse(taskManager.getEpicMap().containsKey(4));
 
 
         // посмотрим удалились ли подзадачи из списка
         for (Integer id : list) {
-            assertFalse(httpTaskServer.taskManager.getTaskMap().containsKey(id));
+            assertFalse(taskManager.getTaskMap().containsKey(id));
         }
 
     }
@@ -477,11 +487,11 @@ class HttpTaskServerTest {
         client.send(request, HttpResponse.BodyHandlers.ofString());
 
         // есть ли задача в общем списке и списке подзадач
-        assertFalse(httpTaskServer.taskManager.getTaskMap().containsKey(5));
-        assertFalse(httpTaskServer.taskManager.getSubTaskMap().containsKey(5));
+        assertFalse(taskManager.getTaskMap().containsKey(5));
+        assertFalse(taskManager.getSubTaskMap().containsKey(5));
 
         // есть ли подзадача в списке подзадач эпика родителя
-        assertFalse(httpTaskServer.taskManager.getEpic(4).getSubTaskList().contains(5));
+        assertFalse(taskManager.getEpic(4).getSubTaskList().contains(5));
 
 
 
@@ -509,7 +519,7 @@ class HttpTaskServerTest {
 
         client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        assertEquals(httpTaskServer.taskManager.getTask(10).getDescription(), "Новая задача");
+        assertEquals(taskManager.getTask(10).getDescription(), "Новая задача");
 
     }
 
@@ -533,7 +543,7 @@ class HttpTaskServerTest {
 
         client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        assertEquals(httpTaskServer.taskManager.getEpic(11).getDescription(), "Новый эпик");
+        assertEquals(taskManager.getEpic(11).getDescription(), "Новый эпик");
     }
 
     @Test
@@ -550,7 +560,7 @@ class HttpTaskServerTest {
 
         String req = gson.toJson(taskToPojoTask(newStep));
 
-        int beforeLength = httpTaskServer.taskManager.getEpic(4).getSubTaskList().size();
+        int beforeLength = taskManager.getEpic(4).getSubTaskList().size();
 
         URI uriTasks = URI.create("http://localhost:8080/tasks/subtask");
         HttpRequest request = HttpRequest.newBuilder()
@@ -561,10 +571,10 @@ class HttpTaskServerTest {
         client.send(request, HttpResponse.BodyHandlers.ofString());
 
 
-        int afterLength = httpTaskServer.taskManager.getEpic(4).getSubTaskList().size();
+        int afterLength = taskManager.getEpic(4).getSubTaskList().size();
 
         assertEquals(beforeLength + 1, afterLength);
-        assertEquals(httpTaskServer.taskManager.getSubTask(10).getDescription(), "Новая подзадача Эпика 1");
+        assertEquals(taskManager.getSubTask(10).getDescription(), "Новая подзадача Эпика 1");
     }
 
     @Test
@@ -591,7 +601,7 @@ class HttpTaskServerTest {
 
         client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        assertEquals(httpTaskServer.taskManager.getTask(2).getDescription(), "Вторая задача обновлена");
+        assertEquals(taskManager.getTask(2).getDescription(), "Вторая задача обновлена");
     }
 
     @Test
@@ -616,7 +626,7 @@ class HttpTaskServerTest {
 
         client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        assertEquals(httpTaskServer.taskManager.getEpic(4).getDescription(), "Первый Эпик обновлен");
+        assertEquals(taskManager.getEpic(4).getDescription(), "Первый Эпик обновлен");
     }
 
     @Test
@@ -644,7 +654,7 @@ class HttpTaskServerTest {
 
         client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        assertEquals(httpTaskServer.taskManager.getSubTask(5).getDescription(), "Первая подзадача Эпика 1 Обновлена");
+        assertEquals(taskManager.getSubTask(5).getDescription(), "Первая подзадача Эпика 1 Обновлена");
     }
 
 }

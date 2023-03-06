@@ -9,12 +9,16 @@ import tracker.util.Managers;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static tracker.util.Status.*;
-import static tracker.util.TaskType.*;
+import static tracker.util.enums.Status.*;
+import static tracker.util.enums.TaskType.*;
 
 public class InMemoryTaskManager implements TaskManager {
 
     private static int id = 1;
+
+    public static void setId(int id) {
+        InMemoryTaskManager.id = id;
+    }
 
     protected HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
 
@@ -32,13 +36,6 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             return o1.getStartTime().compareTo(o2.getStartTime());
         }
-
-//        try {
-//            return o1.getStartTime().compareTo(o2.getStartTime());
-//        } catch (NullPointerException e) {
-//            return 1;
-//        }
-
     });
 
     // Создаем поле флаг. Проверяем не пустой ли у нас список, если пустой то значение флага не изменилось и мы добавляем
@@ -120,6 +117,12 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             System.out.println("Cписок истории задач пуст");
         }
+    }
+
+    @Override
+    public void clear() {
+        deleteAllTask();
+        setId(1);
     }
 
     @Override
@@ -347,8 +350,6 @@ public class InMemoryTaskManager implements TaskManager {
         if (task != null && taskMap.containsKey(task.getId())) {
             instalTaskType(task);
             taskMap.put(task.getId(), task);
-        } else {
-            //System.out.println("Сбой, задача не найдена.");
         }
     }
 
@@ -363,8 +364,6 @@ public class InMemoryTaskManager implements TaskManager {
             taskMap.put(epic.getId(), epic);
             epicMap.put(epic.getId(), epic);
             instalStatusEpic(epic);
-        } else {
-            //System.out.println("Сбой, задача не найдена.");
         }
     }
 
@@ -380,8 +379,6 @@ public class InMemoryTaskManager implements TaskManager {
             taskMap.put(subTask.getId(), subTask);
             subTaskMap.put(subTask.getId(), subTask);
             instalStatusEpic(epicMap.get(subTask.getEpic()));
-        } else {
-            // System.out.println("Сбой, задача не найдена.");
         }
     }
 
@@ -395,8 +392,6 @@ public class InMemoryTaskManager implements TaskManager {
 
             removeTaskFromSet(taskMap.get(id));           //Удаляем задачу из списка приоритетов
             taskMap.remove(id);
-
-            //inMemoryHistoryManager.remove(id);
 
         } else {
             System.out.println("Сбой, задача не найдена.");

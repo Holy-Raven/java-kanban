@@ -41,8 +41,7 @@ public interface TaskManager {
 
     Set<Task> getPrioritizedTasks();
     void printPrioritizedTasks();
-
     List<Task> getHistory();
-
     void printHistoryList();
+    void clear();
 }

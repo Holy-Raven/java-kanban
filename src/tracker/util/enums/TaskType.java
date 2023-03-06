@@ -1,4 +1,4 @@
-package tracker.util;
+package tracker.util.enums;
 
 public enum TaskType {
 
